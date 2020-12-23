@@ -12,8 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   tf2_ros
   tf2_sensor_msgs
-  vdb_mapping
 )
+find_package(vdb_mapping REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -114,9 +114,9 @@ catkin_package(
     roscpp
     tf2_ros
     tf2_sensor_msgs
-    vdb_mapping
 #  DEPENDS system_lib
 )
+
 
 ###########
 ## Build ##
@@ -156,6 +156,7 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
+  vdb_mapping::vdb_mapping
   ${catkin_LIBRARIES}
 )
 
