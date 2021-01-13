@@ -1,9 +1,11 @@
 #include <iostream>
-#include <vdb_mapping/VDBMapping.h>
+#include <vdb_mapping_ros/VDBMappingROS.h>
 
 int main(int argc, char *argv[])
 {
-  VDBMapping test;
+  //VDBMapping test;
+  VDBMappingROS test2;
+
   std::cout << "Hello world" << std::endl;
   return 0;
 }
