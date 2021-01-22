@@ -1,0 +1,19 @@
+<launch>
+  <node pkg="vdb_mapping_ros" type="vdb_mapping_ros_node" name="vdb_mapping" output="screen">
+    <param name="sensor_frame" value="velodyne"/>
+    <!--<param name="sensor_frame" value="base_link"/>-->
+    <!--<param name="submap_size" value="25.0"/>-->
+    <!--<param name="max_range" value="20.0"/>-->
+    <param name="submap_size" value="15.0"/>
+    <param name="max_range" value="10.0"/>
+    <param name="resolution" value="0.07"/>
+    <param name="prob_hit" value="0.8"/>
+    <param name="prob_miss" value="0.1"/>
+    <param name="thres_min" value="0.12"/>
+    <param name="thres_max" value="0.97"/>
+    <param name="linear_submap_error" value="0.05"/>
+    <param name="angular_submap_error" value="0.05"/>
+    <param name="use_nx" value="false"/>
+
+  </node>
+</launch>
