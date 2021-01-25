@@ -186,64 +186,46 @@ visualization_msgs::MarkerArray VDBMappingROS::createSubVDBVisualization(
   }
   return occupied_nodes_vis;
 }
-// Copied from octomap_server
+
+// Conversion from Hue to RGB Value
 std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(double h)
 {
-  std_msgs::ColorRGBA color;
-  color.a  = 1.0;
-  double s = 1.0;
-  double v = 1.0;
+  int i    = (int)(h * 6.0);
+  double f = (h * 6.0) - i;
+  double q = (1.0 - f);
+  i %= 6;
 
-  h -= floor(h);
-  h *= 6;
-  int i;
-  double m, n, f;
-
-  i = floor(h);
-  f = h - i;
-  if (!(i & 1))
-    f = 1 - f; // if i is even
-  m = v * (1 - s);
-  n = v * (1 - s * f);
+  auto toMsg = [](double v1, double v2, double v3) {
+    std_msgs::ColorRGBA rgba;
+    rgba.a = 1.0;
+    rgba.r = v1;
+    rgba.g = v2;
+    rgba.b = v3;
+    return rgba;
+  };
 
   switch (i)
   {
-    case 6:
     case 0:
-      color.r = v;
-      color.g = n;
-      color.b = m;
+      return toMsg(1.0, f, 0.0);
       break;
     case 1:
-      color.r = n;
-      color.g = v;
-      color.b = m;
+      return toMsg(q, 1.0, 0.0);
       break;
     case 2:
-      color.r = m;
-      color.g = v;
-      color.b = n;
+      return toMsg(0.0, 1.0, f);
       break;
     case 3:
-      color.r = m;
-      color.g = n;
-      color.b = v;
+      return toMsg(0.0, q, 1.0);
       break;
     case 4:
-      color.r = n;
-      color.g = m;
-      color.b = v;
+      return toMsg(f, 0.0, 1.0);
       break;
     case 5:
-      color.r = v;
-      color.g = m;
-      color.b = n;
+      return toMsg(1.0, 0.0, q);
       break;
     default:
-      color.r = 1;
-      color.g = 0.5;
-      color.b = 0.5;
+      return toMsg(1.0, 0.5, 0.5);
       break;
   }
-  return color;
 }
