@@ -111,16 +111,15 @@ void VDBMappingROS::processCloud(const PointCloudT::Ptr cloud, geometry_msgs::Tr
   b = ros::Time::now();
   std::cout << "Raycasting: " << (b - a).toSec() << std::endl;
   a = ros::Time::now();
-  m_vis_pub.publish(createSubVDBVisualization((0 * 17), m_vdb_map->getMap(), true, m_map_frame));
+  m_vis_pub.publish(createVDBVisualization(m_vdb_map->getMap(), m_map_frame));
   b = ros::Time::now();
   std::cout << "Visualization: " << (b - a).toSec() << std::endl;
 }
 
 
-visualization_msgs::MarkerArray VDBMappingROS::createSubVDBVisualization(
-  int id_offset, openvdb::FloatGrid::Ptr grid, bool color, std::string frame_id)
+visualization_msgs::MarkerArray VDBMappingROS::createVDBVisualization(openvdb::FloatGrid::Ptr grid,
+                                                                      std::string frame_id)
 {
-  // TODO not sure if tiles are handled correctly
   visualization_msgs::MarkerArray occupied_nodes_vis;
   occupied_nodes_vis.markers.resize(1);
 
@@ -148,46 +147,28 @@ visualization_msgs::MarkerArray VDBMappingROS::createSubVDBVisualization(
 
     occupied_nodes_vis.markers[0].points.push_back(cube_center);
     double h = (1.0 - std::min(std::max((cube_center.z - minZ) / (maxZ - minZ), 0.0), 1.0)) * 0.8;
-
-    if (color)
-    {
-      occupied_nodes_vis.markers[0].colors.push_back(heightColorCoding(h));
-    }
-    else
-    {
-      std_msgs::ColorRGBA white;
-      white.a = 1.0;
-      white.r = 1.0;
-      white.g = 1.0;
-      white.b = 1.0;
-      occupied_nodes_vis.markers[0].colors.push_back(white);
-    }
+    occupied_nodes_vis.markers[0].colors.push_back(heightColorCoding(h));
   }
 
-  // finish marker array ... kind of inefficient
-  for (unsigned i = 0; i < occupied_nodes_vis.markers.size(); ++i)
+  double size                                   = m_resolution;
+  occupied_nodes_vis.markers[0].header.frame_id = frame_id;
+  occupied_nodes_vis.markers[0].header.stamp    = ros::Time::now();
+  occupied_nodes_vis.markers[0].id              = 0;
+  occupied_nodes_vis.markers[0].type            = visualization_msgs::Marker::CUBE_LIST;
+  occupied_nodes_vis.markers[0].scale.x         = size;
+  occupied_nodes_vis.markers[0].scale.y         = size;
+  occupied_nodes_vis.markers[0].scale.z         = size;
+  occupied_nodes_vis.markers[0].color.a         = 1.0;
+  occupied_nodes_vis.markers[0].color.r         = 1.0;
+  occupied_nodes_vis.markers[0].frame_locked    = true;
+
+  if (occupied_nodes_vis.markers[0].points.size() > 0)
   {
-    double size                                   = m_resolution;
-    occupied_nodes_vis.markers[i].header.frame_id = frame_id;
-    occupied_nodes_vis.markers[i].header.stamp    = ros::Time::now();
-    occupied_nodes_vis.markers[i].id              = id_offset + i;
-    occupied_nodes_vis.markers[i].type            = visualization_msgs::Marker::CUBE_LIST;
-    occupied_nodes_vis.markers[i].scale.x         = size;
-    occupied_nodes_vis.markers[i].scale.y         = size;
-    occupied_nodes_vis.markers[i].scale.z         = size;
-
-    occupied_nodes_vis.markers[i].color.a      = 1.0;
-    occupied_nodes_vis.markers[i].color.r      = 1.0;
-    occupied_nodes_vis.markers[i].frame_locked = true;
-
-    if (occupied_nodes_vis.markers[i].points.size() > 0)
-    {
-      occupied_nodes_vis.markers[i].action = visualization_msgs::Marker::ADD;
-    }
-    else
-    {
-      occupied_nodes_vis.markers[i].action = visualization_msgs::Marker::DELETE;
-    }
+    occupied_nodes_vis.markers[0].action = visualization_msgs::Marker::ADD;
+  }
+  else
+  {
+    occupied_nodes_vis.markers[0].action = visualization_msgs::Marker::DELETE;
   }
   return occupied_nodes_vis;
 }

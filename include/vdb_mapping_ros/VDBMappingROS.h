@@ -29,10 +29,8 @@ public:
   void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
   void processCloud(const PointCloudT::Ptr cloud, geometry_msgs::TransformStamped tf);
 
-  visualization_msgs::MarkerArray createSubVDBVisualization(int id_offset,
-                                                            openvdb::FloatGrid::Ptr grid,
-                                                            bool color,
-                                                            std::string frame_id);
+  visualization_msgs::MarkerArray createVDBVisualization(openvdb::FloatGrid::Ptr grid,
+                                                         std::string frame_id);
   std_msgs::ColorRGBA heightColorCoding(double h);
 
 private:
