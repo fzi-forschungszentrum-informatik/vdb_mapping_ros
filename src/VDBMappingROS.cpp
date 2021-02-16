@@ -18,9 +18,6 @@ VDBMappingROS::VDBMappingROS()
   m_vdb_map->setConfig(m_config);
 
 
-  m_priv_nh.param<double>("submap_size", m_submap_size, 15.0);
-  m_priv_nh.param<double>("linear_submap_error", m_linear_submap_error, 0.1);
-  m_priv_nh.param<double>("angular_submap_error", m_angular_submap_error, 0.05);
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame == "")
   {
@@ -34,8 +31,7 @@ VDBMappingROS::VDBMappingROS()
     ROS_WARN_STREAM("No sensor frame specified");
   }
 
-  m_sensor_cloud_sub =
-    m_nh.subscribe("points", 1, &VDBMappingROS::sensorCloudCallback, this);
+  m_sensor_cloud_sub = m_nh.subscribe("points", 1, &VDBMappingROS::sensorCloudCallback, this);
 
   m_aligned_cloud_sub =
     m_nh.subscribe("scan_matched_points2", 1, &VDBMappingROS::alignedCloudCallback, this);
@@ -55,7 +51,7 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
   }
   catch (tf::TransformException& ex)
   {
-    ROS_ERROR_STREAM("Transform to submap frame failed: " << ex.what());
+    ROS_ERROR_STREAM("Transform to map frame failed: " << ex.what());
     return;
   }
 
@@ -74,8 +70,7 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
 
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
-
-  ros::Time a,b;
+  ros::Time a, b;
 
 
   PointCloudT::Ptr sensor_cloud(new PointCloudT);

@@ -45,15 +45,9 @@ private:
 
   double m_max_range;
   double m_resolution;
-  double m_submap_size;
-  double m_linear_submap_error;
-  double m_angular_submap_error;
 
   std::string m_sensor_frame;
   std::string m_map_frame;
-
-  visualization_msgs::MarkerArray m_vis_marker;
-
   VDBMapping* m_vdb_map;
   VDBMapping::Config m_config;
 };
