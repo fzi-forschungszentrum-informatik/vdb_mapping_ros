@@ -27,6 +27,7 @@ public:
 
   void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
   void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+  void processCloud(const PointCloudT::Ptr cloud, geometry_msgs::TransformStamped tf);
 
   visualization_msgs::MarkerArray createSubVDBVisualization(int id_offset,
                                                             openvdb::FloatGrid::Ptr grid,
