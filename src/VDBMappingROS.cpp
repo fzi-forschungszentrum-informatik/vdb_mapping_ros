@@ -73,8 +73,8 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   ros::Time a, b;
 
 
-  PointCloudT::Ptr sensor_cloud(new PointCloudT);
-  pcl::fromROSMsg(*msg, *sensor_cloud);
+  PointCloudT::Ptr cloud(new PointCloudT);
+  pcl::fromROSMsg(*msg, *cloud);
 
   geometry_msgs::TransformStamped sensor_to_map_tf;
   try
@@ -84,17 +84,17 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   }
   catch (tf2::TransformException& ex)
   {
-    ROS_ERROR_STREAM("Transform from sensor to map frame failed:" << ex.what());
+    ROS_ERROR_STREAM("Transform to map frame failed:" << ex.what());
     return;
   }
-  pcl::transformPointCloud(
-    *sensor_cloud, *sensor_cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
-  sensor_cloud->header.frame_id = m_map_frame;
+  // Transform pointcloud into map reference system
+  pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
+  cloud->header.frame_id = m_map_frame;
 
   b = ros::Time::now();
   std::cout << "Preprocessing: " << (b - a).toSec() << std::endl;
 
-  processCloud(sensor_cloud, sensor_to_map_tf);
+  processCloud(cloud, sensor_to_map_tf);
 }
 
 void VDBMappingROS::processCloud(const PointCloudT::Ptr cloud, geometry_msgs::TransformStamped tf)
