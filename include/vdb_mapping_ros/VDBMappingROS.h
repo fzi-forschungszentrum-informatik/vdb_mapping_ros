@@ -25,30 +25,104 @@ public:
   VDBMappingROS();
   virtual ~VDBMappingROS(){};
 
+
+  /*!
+   * \brief Sensor callback for scan aligned Pointclouds
+   * In contrast to the normal sensor callback here an additional sensor frame has to be specified
+   * as origin of the raycasting
+   *
+   * \param msg PointCloud message
+   */
   void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+  /*!
+   * \brief Sensor callback for raw pointclouds. All data will be transformed into the map frame.
+   *
+   * \param msg
+   */
   void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+  /*!
+   * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library
+   *
+   *
+   * \param cloud Point cloud transformed into map coordinates
+   * \param tf Sensor transform in map coordinates
+   */
   void processCloud(const PointCloudT::Ptr cloud, geometry_msgs::TransformStamped tf);
 
+  /*!
+   * \brief Creates a Marker array from the generated VDB map
+   *
+   * \param grid Pointer to VDB Grid
+   * \param frame_id Frame id of the map
+   *
+   * \returns Marker array of all grid cells
+   */
   visualization_msgs::MarkerArray createVDBVisualization(openvdb::FloatGrid::Ptr grid,
                                                          std::string frame_id);
+  /*!
+   * \brief Calculates a height correlating color coding
+   *
+   * \param h Gridcell height relativ to the min and max height of the complete grid. Parameter can
+   * take values between 0 and 1
+   *
+   * \returns RGBA color of the grid cell
+   */
   std_msgs::ColorRGBA heightColorCoding(double h);
 
 private:
+  /*!
+   * \brief Public node handle
+   */
   ros::NodeHandle m_nh;
+  /*!
+   * \brief Private node handle
+   */
   ros::NodeHandle m_priv_nh;
+  /*!
+   * \brief Subscriber for raw pointclouds
+   */
   ros::Subscriber m_sensor_cloud_sub;
+  /*!
+   * \brief Subscriber for scan aligned pointclouds
+   */
   ros::Subscriber m_aligned_cloud_sub;
+  /*!
+   * \brief Publisher for the marker array
+   */
   ros::Publisher m_vis_pub;
 
+  /*!
+   * \brief Transformation buffer
+   */
   tf2_ros::Buffer m_tf_buffer;
+  /*!
+   * \brief Transformation listener
+   */
   tf2_ros::TransformListener m_tf_listener;
 
+  /*!
+   * \brief Maximum raycasting range
+   */
   double m_max_range;
+  /*!
+   * \brief Grid cell resolution
+   */
   double m_resolution;
-
+  /*!
+   * \brief Sensor frame used for raycasting of scan aligned pointclouds
+   */
   std::string m_sensor_frame;
+  /*!
+   * \brief Map Frame
+   */
   std::string m_map_frame;
+  /*!
+   * \brief Map pointer
+   */
   VDBMapping* m_vdb_map;
+  /*!
+   * \brief Map configuration
+   */
   VDBMapping::Config m_config;
 };
 

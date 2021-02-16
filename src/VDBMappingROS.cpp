@@ -14,20 +14,19 @@ VDBMappingROS::VDBMappingROS()
   m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
 
-
+  // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
-
 
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame == "")
   {
-    // TODO maybe handle this as error
+    // TODO handle this as error
     ROS_WARN_STREAM("No sensor frame specified");
   }
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "");
   if (m_map_frame == "")
   {
-    // TODO maybe handle this as error
+    // TODO handle this as error
     ROS_WARN_STREAM("No sensor frame specified");
   }
 
@@ -35,6 +34,7 @@ VDBMappingROS::VDBMappingROS()
 
   m_aligned_cloud_sub =
     m_nh.subscribe("scan_matched_points2", 1, &VDBMappingROS::alignedCloudCallback, this);
+
   m_vis_pub = m_nh.advertise<visualization_msgs::MarkerArray>("vdb_map", 1, true);
 }
 
@@ -47,6 +47,7 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
   pcl::fromROSMsg(*msg, *cloud);
   try
   {
+    // Get sensor origin transform in map coordinates
     sensor_to_map_tf = m_tf_buffer.lookupTransform(m_map_frame, m_sensor_frame, msg->header.stamp);
   }
   catch (tf::TransformException& ex)
@@ -55,6 +56,7 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
     return;
   }
 
+  // If aligned map is not already in correct map frame, transform it
   if (m_map_frame != msg->header.frame_id)
   {
     pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
@@ -79,6 +81,7 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   geometry_msgs::TransformStamped sensor_to_map_tf;
   try
   {
+    // Get sensor origin transform in map coordinates
     sensor_to_map_tf =
       m_tf_buffer.lookupTransform(m_map_frame, msg->header.frame_id, msg->header.stamp);
   }
@@ -102,10 +105,12 @@ void VDBMappingROS::processCloud(const PointCloudT::Ptr cloud, geometry_msgs::Tr
   ros::Time a, b;
   a                                               = ros::Time::now();
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(tf).translation();
+  // Integrate data into vdb grid
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
   b = ros::Time::now();
   std::cout << "Raycasting: " << (b - a).toSec() << std::endl;
   a = ros::Time::now();
+  // Create and publish marker visualization
   m_vis_pub.publish(createVDBVisualization(m_vdb_map->getMap(), m_map_frame));
   b = ros::Time::now();
   std::cout << "Visualization: " << (b - a).toSec() << std::endl;
