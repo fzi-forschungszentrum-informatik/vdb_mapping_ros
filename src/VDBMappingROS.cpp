@@ -75,7 +75,7 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
 
-
+  ros::Time a,b;
 
 
   PointCloudT::Ptr sensor_cloud(new PointCloudT);
@@ -114,6 +114,7 @@ void VDBMappingROS::processCloud(const PointCloudT::Ptr cloud, geometry_msgs::Tr
   m_vis_pub.publish(createSubVDBVisualization((0 * 17), m_vdb_map->getMap(), true, m_map_frame));
   b = ros::Time::now();
   std::cout << "Visualization: " << (b - a).toSec() << std::endl;
+}
 
 
 visualization_msgs::MarkerArray VDBMappingROS::createSubVDBVisualization(
