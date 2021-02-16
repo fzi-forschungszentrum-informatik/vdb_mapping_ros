@@ -29,6 +29,8 @@ VDBMappingROS::VDBMappingROS()
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   ROS_INFO_STREAM("Processing new aligned PointCloud");
+  ros::Time a, b;
+  a = ros::Time::now();
   geometry_msgs::TransformStamped sensor_to_cloud_tf;
 
   PointCloudT::Ptr cloud(new PointCloudT);
@@ -44,13 +46,18 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
     return;
   }
 
-  Eigen::Matrix<double, 3, 1> blub(sensor_to_cloud_tf.transform.translation.x,
+  Eigen::Matrix<double, 3, 1> sensor_to_cloud_eigen(sensor_to_cloud_tf.transform.translation.x,
                                    sensor_to_cloud_tf.transform.translation.y,
                                    sensor_to_cloud_tf.transform.translation.z);
-  std::cout << "Updating map" << std::endl;
-  m_vdb_map.insertPointCloud(cloud, blub);
-  m_vis_pub.publish(
-    createSubVDBVisualization((0 * 17), m_vdb_map.getMap(), true, "map"));
+  m_vdb_map->insertPointCloud(cloud, sensor_to_cloud_eigen);
+
+  b = ros::Time::now();
+  std::cout << "Raycasting: " << (b - a).toSec() << std::endl;
+
+  a = ros::Time::now();
+  m_vis_pub.publish(createSubVDBVisualization((0 * 17), m_vdb_map->getMap(), true, "map"));
+  b = ros::Time::now();
+  std::cout << "Visualization: " << (b - a).toSec() << std::endl;
 }
 
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
