@@ -5,7 +5,19 @@ VDBMappingROS::VDBMappingROS()
   : m_priv_nh("~")
   , m_tf_listener(m_tf_buffer)
 {
-  m_priv_nh.param<double>("max_range", m_max_range, 5.0);
+  m_priv_nh.param<double>("resolution", m_resolution, 0.1);
+  m_vdb_map = new VDBMapping(m_resolution);
+
+  m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
+  m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
+  m_priv_nh.param<double>("prob_miss", m_config.prob_miss, 0.4);
+  m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
+  m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
+
+
+  m_vdb_map->setConfig(m_config);
+
+
   m_priv_nh.param<double>("submap_size", m_submap_size, 15.0);
   m_priv_nh.param<double>("linear_submap_error", m_linear_submap_error, 0.1);
   m_priv_nh.param<double>("angular_submap_error", m_angular_submap_error, 0.05);
@@ -16,8 +28,6 @@ VDBMappingROS::VDBMappingROS()
     ROS_WARN_STREAM("No sensor frame specified");
   }
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "map");
-
-  m_priv_nh.param<double>("resolution", m_resolution, 0.1);
 
 
   m_sensor_cloud_sub = m_nh.subscribe("scan", 1, &VDBMappingROS::sensorCloudCallback, this);

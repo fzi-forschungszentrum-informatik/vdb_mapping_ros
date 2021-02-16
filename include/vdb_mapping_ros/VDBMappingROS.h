@@ -55,7 +55,8 @@ private:
 
   visualization_msgs::MarkerArray m_vis_marker;
 
-  VDBMapping m_vdb_map;
+  VDBMapping* m_vdb_map;
+  VDBMapping::Config m_config;
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */
