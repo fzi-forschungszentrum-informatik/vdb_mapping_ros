@@ -2,7 +2,7 @@
 <package format="2">
   <name>vdb_mapping_ros</name>
   <version>0.1.0</version>
-  <description>The vdb_mapping_ros package</description>
+  <description>The vdb_mapping_ros package is a ROS wrapper for the vdb_mapping package used for fast volumetric mapping.</description>
 
   <maintainer email="grosse@fzi.de">Marvin Große Besselmann</maintainer>
 
