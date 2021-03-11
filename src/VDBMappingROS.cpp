@@ -20,13 +20,11 @@ VDBMappingROS::VDBMappingROS()
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame == "")
   {
-    // TODO handle this as error
     ROS_WARN_STREAM("No sensor frame specified");
   }
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "");
   if (m_map_frame == "")
   {
-    // TODO handle this as error
     ROS_WARN_STREAM("No sensor frame specified");
   }
 
