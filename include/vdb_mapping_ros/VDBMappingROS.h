@@ -29,7 +29,7 @@
 #define VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED
 
 #include <ros/ros.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
 
 #include <vdb_mapping/VDBMapping.h>
 
@@ -82,17 +82,17 @@ public:
                     const geometry_msgs::TransformStamped transform);
 
   /*!
-   * \brief Creates a Marker array from the generated VDB map
+   * \brief Creates a Marker from the generated VDB map
    *
    * \param grid Pointer to VDB Grid
    * \param frame_id Frame id of the map
    *
-   * \returns Marker array of all grid cells
+   * \returns Marker containing all grid cells
    */
-  visualization_msgs::MarkerArray createVDBVisualization(openvdb::FloatGrid::Ptr grid,
-                                                         std::string frame_id);
+  visualization_msgs::Marker createVDBVisualization(const openvdb::FloatGrid::Ptr grid,
+                                                    const std::string frame_id);
   /*!
-   * \brief Calculates a height correlating color coding
+   * \brief Calculates a height correlating color coding using HSV color space
    *
    * \param h Gridcell height relativ to the min and max height of the complete grid. Parameter can
    * take values between 0 and 1

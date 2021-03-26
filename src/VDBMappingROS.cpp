@@ -60,7 +60,7 @@ VDBMappingROS::VDBMappingROS()
   m_aligned_cloud_sub =
     m_nh.subscribe("scan_matched_points2", 1, &VDBMappingROS::alignedCloudCallback, this);
 
-  m_vis_pub = m_nh.advertise<visualization_msgs::MarkerArray>("vdb_map", 1, true);
+  m_vis_pub = m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
 }
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
@@ -143,24 +143,18 @@ void VDBMappingROS::processCloud(const VDBMapping::PointCloudT::Ptr cloud,
   std::cout << "Visualization: " << (b - a).toSec() << std::endl;
 }
 
-
-visualization_msgs::MarkerArray VDBMappingROS::createVDBVisualization(openvdb::FloatGrid::Ptr grid,
-                                                                      std::string frame_id)
+visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::FloatGrid::Ptr grid,
+                                                                 const std::string frame_id)
 {
-  visualization_msgs::MarkerArray occupied_nodes_vis;
-  occupied_nodes_vis.markers.resize(1);
+  visualization_msgs::Marker occupied_nodes_vis;
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
-  double minX, minY, minZ, maxX, maxY, maxZ;
+  double min_z, max_z;
   openvdb::Vec3d min_world_coord = grid->indexToWorld(bbox.getStart());
   openvdb::Vec3d max_world_coord = grid->indexToWorld(bbox.getEnd());
 
-  minX = min_world_coord.x();
-  minY = min_world_coord.y();
-  minZ = min_world_coord.z();
-  maxX = max_world_coord.x();
-  maxY = max_world_coord.y();
-  maxZ = max_world_coord.z();
+  min_z = min_world_coord.z();
+  max_z = max_world_coord.z();
 
 
   for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
@@ -172,30 +166,31 @@ visualization_msgs::MarkerArray VDBMappingROS::createVDBVisualization(openvdb::F
     cube_center.y = world_coord.y();
     cube_center.z = world_coord.z();
 
-    occupied_nodes_vis.markers[0].points.push_back(cube_center);
-    double h = (1.0 - std::min(std::max((cube_center.z - minZ) / (maxZ - minZ), 0.0), 1.0)) * 0.8;
-    occupied_nodes_vis.markers[0].colors.push_back(heightColorCoding(h));
+    occupied_nodes_vis.points.push_back(cube_center);
+    double h = (1.0 - ((cube_center.z - min_z) / (max_z - min_z)));
+    occupied_nodes_vis.colors.push_back(heightColorCoding(h));
   }
 
-  double size                                   = m_resolution;
-  occupied_nodes_vis.markers[0].header.frame_id = frame_id;
-  occupied_nodes_vis.markers[0].header.stamp    = ros::Time::now();
-  occupied_nodes_vis.markers[0].id              = 0;
-  occupied_nodes_vis.markers[0].type            = visualization_msgs::Marker::CUBE_LIST;
-  occupied_nodes_vis.markers[0].scale.x         = size;
-  occupied_nodes_vis.markers[0].scale.y         = size;
-  occupied_nodes_vis.markers[0].scale.z         = size;
-  occupied_nodes_vis.markers[0].color.a         = 1.0;
-  occupied_nodes_vis.markers[0].color.r         = 1.0;
-  occupied_nodes_vis.markers[0].frame_locked    = true;
+  double size                           = m_resolution;
+  occupied_nodes_vis.header.frame_id    = frame_id;
+  occupied_nodes_vis.header.stamp       = ros::Time::now();
+  occupied_nodes_vis.id                 = 0;
+  occupied_nodes_vis.type               = visualization_msgs::Marker::CUBE_LIST;
+  occupied_nodes_vis.scale.x            = size;
+  occupied_nodes_vis.scale.y            = size;
+  occupied_nodes_vis.scale.z            = size;
+  occupied_nodes_vis.color.a            = 1.0;
+  occupied_nodes_vis.color.r            = 1.0;
+  occupied_nodes_vis.pose.orientation.w = 1.0;
+  occupied_nodes_vis.frame_locked       = true;
 
-  if (occupied_nodes_vis.markers[0].points.size() > 0)
+  if (occupied_nodes_vis.points.size() > 0)
   {
-    occupied_nodes_vis.markers[0].action = visualization_msgs::Marker::ADD;
+    occupied_nodes_vis.action = visualization_msgs::Marker::ADD;
   }
   else
   {
-    occupied_nodes_vis.markers[0].action = visualization_msgs::Marker::DELETE;
+    occupied_nodes_vis.action = visualization_msgs::Marker::DELETE;
   }
   return occupied_nodes_vis;
 }
