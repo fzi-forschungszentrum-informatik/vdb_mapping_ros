@@ -45,14 +45,14 @@ VDBMappingROS::VDBMappingROS()
   m_vdb_map->setConfig(m_config);
 
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
-  if (m_sensor_frame == "")
+  if (m_sensor_frame.empty())
   {
     ROS_WARN_STREAM("No sensor frame specified");
   }
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "");
-  if (m_map_frame == "")
+  if (m_map_frame.empty())
   {
-    ROS_WARN_STREAM("No sensor frame specified");
+    ROS_WARN_STREAM("No map frame specified");
   }
 
   m_sensor_cloud_sub = m_nh.subscribe("points", 1, &VDBMappingROS::sensorCloudCallback, this);
@@ -100,10 +100,10 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   ros::Time a, b;
 
 
-  PointCloudT::Ptr cloud(new PointCloudT);
-  pcl::fromROSMsg(*msg, *cloud);
-
   geometry_msgs::TransformStamped sensor_to_map_tf;
+  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+  pcl::fromROSMsg(*cloud_msg, *cloud);
+
   try
   {
     // Get sensor origin transform in map coordinates

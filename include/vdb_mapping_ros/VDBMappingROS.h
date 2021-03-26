@@ -37,12 +37,14 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
-// TODO which one is needed?
-#include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
+
+/*!
+ * \brief ROS wrapper class for vdb_mapping
+ */
 class VDBMappingROS
 {
   using PointT      = pcl::PointXYZ;
@@ -101,18 +103,22 @@ private:
    * \brief Public node handle
    */
   ros::NodeHandle m_nh;
+
   /*!
    * \brief Private node handle
    */
   ros::NodeHandle m_priv_nh;
+
   /*!
    * \brief Subscriber for raw pointclouds
    */
   ros::Subscriber m_sensor_cloud_sub;
+
   /*!
    * \brief Subscriber for scan aligned pointclouds
    */
   ros::Subscriber m_aligned_cloud_sub;
+
   /*!
    * \brief Publisher for the marker array
    */
@@ -122,27 +128,27 @@ private:
    * \brief Transformation buffer
    */
   tf2_ros::Buffer m_tf_buffer;
+
   /*!
    * \brief Transformation listener
    */
   tf2_ros::TransformListener m_tf_listener;
 
   /*!
-   * \brief Maximum raycasting range
-   */
-  double m_max_range;
-  /*!
    * \brief Grid cell resolution
    */
   double m_resolution;
+
   /*!
    * \brief Sensor frame used for raycasting of scan aligned pointclouds
    */
   std::string m_sensor_frame;
+
   /*!
    * \brief Map Frame
    */
   std::string m_map_frame;
+
   /*!
    * \brief Map pointer
    */
