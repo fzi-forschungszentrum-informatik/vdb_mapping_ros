@@ -68,7 +68,8 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
   ros::Time a, b;
   a = ros::Time::now();
   geometry_msgs::TransformStamped sensor_to_map_tf;
-  PointCloudT::Ptr cloud(new PointCloudT);
+  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+
   pcl::fromROSMsg(*cloud_msg, *cloud);
   try
   {

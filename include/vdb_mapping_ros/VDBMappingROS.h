@@ -47,9 +47,6 @@
  */
 class VDBMappingROS
 {
-  using PointT      = pcl::PointXYZ;
-  using PointCloudT = pcl::PointCloud<PointT>;
-
 public:
   VDBMappingROS();
   virtual ~VDBMappingROS(){};
