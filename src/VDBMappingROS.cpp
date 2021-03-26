@@ -33,7 +33,7 @@ VDBMappingROS::VDBMappingROS()
   , m_tf_listener(m_tf_buffer)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
-  m_vdb_map = new VDBMapping(m_resolution);
+  m_vdb_map = std::make_unique<VDBMapping>(m_resolution);
 
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);

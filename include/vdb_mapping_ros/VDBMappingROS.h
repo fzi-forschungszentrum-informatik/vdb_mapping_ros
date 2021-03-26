@@ -155,7 +155,8 @@ private:
   /*!
    * \brief Map pointer
    */
-  VDBMapping* m_vdb_map;
+  std::unique_ptr<VDBMapping> m_vdb_map;
+
   /*!
    * \brief Map configuration
    */
