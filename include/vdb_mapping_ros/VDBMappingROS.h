@@ -62,13 +62,15 @@ public:
    *
    * \param msg PointCloud message
    */
-  void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+  void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+
   /*!
    * \brief Sensor callback for raw pointclouds. All data will be transformed into the map frame.
    *
    * \param msg
    */
-  void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+  void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+
   /*!
    * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library
    *
@@ -76,7 +78,8 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void processCloud(const PointCloudT::Ptr cloud, geometry_msgs::TransformStamped tf);
+  void processCloud(const VDBMapping::PointCloudT::Ptr cloud,
+                    const geometry_msgs::TransformStamped transform);
 
   /*!
    * \brief Creates a Marker array from the generated VDB map
@@ -96,7 +99,7 @@ public:
    *
    * \returns RGBA color of the grid cell
    */
-  std_msgs::ColorRGBA heightColorCoding(double h);
+  std_msgs::ColorRGBA heightColorCoding(const double h);
 
 private:
   /*!
