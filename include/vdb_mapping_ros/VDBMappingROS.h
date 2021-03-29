@@ -75,8 +75,13 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void processCloud(const VDBMapping::PointCloudT::Ptr cloud,
-                    const geometry_msgs::TransformStamped transform);
+  void insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
+                        const geometry_msgs::TransformStamped transform);
+
+  /*!
+   * \brief Publishes a visualization of the map as a marker topic
+   */
+  void visualizeMap();
 
   /*!
    * \brief Creates a Marker from the generated VDB map
@@ -91,12 +96,12 @@ public:
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
    *
-   * \param h Gridcell height relativ to the min and max height of the complete grid. Parameter can
-   * take values between 0 and 1
+   * \param height Gridcell height relativ to the min and max height of the complete grid. Parameter
+   * can take values between 0 and 1
    *
    * \returns RGBA color of the grid cell
    */
-  std_msgs::ColorRGBA heightColorCoding(const double h);
+  std_msgs::ColorRGBA heightColorCoding(const double height);
 
 private:
   /*!

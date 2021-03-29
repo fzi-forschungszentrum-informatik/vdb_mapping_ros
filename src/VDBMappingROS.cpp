@@ -65,12 +65,9 @@ VDBMappingROS::VDBMappingROS()
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  ros::Time a, b;
-  a = ros::Time::now();
-  geometry_msgs::TransformStamped sensor_to_map_tf;
   VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
-
   pcl::fromROSMsg(*cloud_msg, *cloud);
+  geometry_msgs::TransformStamped sensor_to_map_tf;
   try
   {
     // Get sensor origin transform in map coordinates
@@ -90,22 +87,15 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
     cloud->header.frame_id = m_map_frame;
   }
 
-  b = ros::Time::now();
-  std::cout << "Preprocessing: " << (b - a).toSec() << std::endl;
-
-
-  processCloud(cloud, sensor_to_map_tf);
+  insertPointCloud(cloud, sensor_to_map_tf);
 }
 
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  ros::Time a, b;
-
-
-  geometry_msgs::TransformStamped sensor_to_map_tf;
   VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
+  geometry_msgs::TransformStamped sensor_to_map_tf;
   try
   {
     // Get sensor origin transform in map coordinates
@@ -121,14 +111,11 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
   cloud->header.frame_id = m_map_frame;
 
-  b = ros::Time::now();
-  std::cout << "Preprocessing: " << (b - a).toSec() << std::endl;
-
-  processCloud(cloud, sensor_to_map_tf);
+  insertPointCloud(cloud, sensor_to_map_tf);
 }
 
-void VDBMappingROS::processCloud(const VDBMapping::PointCloudT::Ptr cloud,
-                                 const geometry_msgs::TransformStamped transform)
+void VDBMappingROS::insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
+                                     const geometry_msgs::TransformStamped transform)
 {
   ros::Time a, b;
   a                                               = ros::Time::now();
@@ -137,6 +124,12 @@ void VDBMappingROS::processCloud(const VDBMapping::PointCloudT::Ptr cloud,
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
   b = ros::Time::now();
   std::cout << "Raycasting: " << (b - a).toSec() << std::endl;
+  visualizeMap();
+}
+
+void VDBMappingROS::visualizeMap()
+{
+  ros::Time a,b;
   a = ros::Time::now();
   // Create and publish marker visualization
   m_vis_pub.publish(createVDBVisualization(m_vdb_map->getMap(), m_map_frame));
@@ -168,6 +161,7 @@ visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::
     cube_center.z = world_coord.z();
 
     occupied_nodes_vis.points.push_back(cube_center);
+    // Calculate the relative height of each voxel.
     double h = (1.0 - ((cube_center.z - min_z) / (max_z - min_z)));
     occupied_nodes_vis.colors.push_back(heightColorCoding(h));
   }
@@ -181,7 +175,6 @@ visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::
   occupied_nodes_vis.scale.y            = size;
   occupied_nodes_vis.scale.z            = size;
   occupied_nodes_vis.color.a            = 1.0;
-  occupied_nodes_vis.color.r            = 1.0;
   occupied_nodes_vis.pose.orientation.w = 1.0;
   occupied_nodes_vis.frame_locked       = true;
 
@@ -197,8 +190,11 @@ visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::
 }
 
 // Conversion from Hue to RGB Value
-std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double h)
+std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double height)
 {
+  // The factor of 0.8 is only for a nicer color range
+  double h = height * 0.8;
+
   int i    = (int)(h * 6.0);
   double f = (h * 6.0) - i;
   double q = (1.0 - f);
