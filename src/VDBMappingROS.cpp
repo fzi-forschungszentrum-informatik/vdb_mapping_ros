@@ -55,10 +55,15 @@ VDBMappingROS::VDBMappingROS()
     ROS_WARN_STREAM("No map frame specified");
   }
 
-  m_sensor_cloud_sub = m_nh.subscribe("points", 1, &VDBMappingROS::sensorCloudCallback, this);
+  std::string raw_points_topic, aligned_points_topic;
+  m_priv_nh.param<std::string>("raw_points", raw_points_topic, "");
+  m_priv_nh.param<std::string>("aligned_points", aligned_points_topic, "");
+
+  m_sensor_cloud_sub =
+    m_nh.subscribe(raw_points_topic, 1, &VDBMappingROS::sensorCloudCallback, this);
 
   m_aligned_cloud_sub =
-    m_nh.subscribe("scan_matched_points2", 1, &VDBMappingROS::alignedCloudCallback, this);
+    m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
 
   m_vis_pub = m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
 }
