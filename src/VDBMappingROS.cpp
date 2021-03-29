@@ -88,7 +88,18 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
   // If aligned map is not already in correct map frame, transform it
   if (m_map_frame != cloud_msg->header.frame_id)
   {
-    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
+    geometry_msgs::TransformStamped map_to_map_tf;
+    try
+    {
+      map_to_map_tf = m_tf_buffer.lookupTransform(
+        m_map_frame, cloud_msg->header.frame_id, cloud_msg->header.stamp);
+    }
+    catch (tf::TransformException& ex)
+    {
+      ROS_ERROR_STREAM("Transform to map frame failed: " << ex.what());
+      return;
+    }
+    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(map_to_map_tf).matrix());
     cloud->header.frame_id = m_map_frame;
   }
 
