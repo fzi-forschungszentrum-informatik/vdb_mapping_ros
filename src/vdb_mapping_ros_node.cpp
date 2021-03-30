@@ -25,10 +25,10 @@
  */
 //----------------------------------------------------------------------
 
-#include <vdb_mapping_ros/VDBMappingROS.h>
 #include <ros/ros.h>
+#include <vdb_mapping_ros/VDBMappingROS.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "vdb_mapping_node");
   ros::NodeHandle nh;

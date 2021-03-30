@@ -68,6 +68,13 @@ VDBMappingROS::VDBMappingROS()
   m_vis_pub = m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
 }
 
+void VDBMappingROS::resetMap()
+{
+  ROS_INFO_STREAM("Reseting Map");
+  m_vdb_map->resetMap();
+  visualizeMap();
+}
+
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
   VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);

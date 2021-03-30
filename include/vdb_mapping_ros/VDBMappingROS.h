@@ -48,9 +48,16 @@
 class VDBMappingROS
 {
 public:
+  /*!
+   * \brief Creates a new VDBMappingROS instance
+   */
   VDBMappingROS();
   virtual ~VDBMappingROS(){};
 
+  /*!
+   * \brief Resets the current map
+   */
+  void resetMap();
 
   /*!
    * \brief Sensor callback for scan aligned Pointclouds
@@ -102,6 +109,7 @@ public:
    * \returns RGBA color of the grid cell
    */
   std_msgs::ColorRGBA heightColorCoding(const double height);
+
 
 private:
   /*!
