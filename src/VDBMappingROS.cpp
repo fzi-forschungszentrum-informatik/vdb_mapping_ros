@@ -140,24 +140,16 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
 void VDBMappingROS::insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
                                      const geometry_msgs::TransformStamped transform)
 {
-  ros::Time a, b;
-  a                                               = ros::Time::now();
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
   // Integrate data into vdb grid
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
-  b = ros::Time::now();
-  std::cout << "Raycasting: " << (b - a).toSec() << std::endl;
   visualizeMap();
 }
 
 void VDBMappingROS::visualizeMap()
 {
-  ros::Time a,b;
-  a = ros::Time::now();
   // Create and publish marker visualization
   m_vis_pub.publish(createVDBVisualization(m_vdb_map->getMap(), m_map_frame));
-  b = ros::Time::now();
-  std::cout << "Visualization: " << (b - a).toSec() << std::endl;
 }
 
 visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::FloatGrid::Ptr grid,
