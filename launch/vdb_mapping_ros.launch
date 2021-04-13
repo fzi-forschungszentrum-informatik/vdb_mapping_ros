@@ -8,7 +8,7 @@
   <arg name="prob_hit"       default="0.8"/>
   <arg name="prob_miss"      default="0.1"/>
   <arg name="prob_thres_min" default="0.12"/>
-  <arg name="prob_thres_max" default="0.97"/>
+  <arg name="prob_thres_max" default="0.8"/>
 
   <node pkg="vdb_mapping_ros" type="vdb_mapping_ros_node" name="vdb_mapping" output="screen">
     <param name="aligned_points" type="string" value="$(arg aligned_points)"/>
