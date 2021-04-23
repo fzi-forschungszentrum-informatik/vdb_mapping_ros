@@ -2,7 +2,7 @@ VDB Mapping ROS Package
 ===
 DISCLAIMER: This library is still under development. Be warned that some interfaces will be changed and/or extended in the future.
 
-The VDB Mapping ROS Package is a ROS wrapper around [VDB Mappping](https://github.com/fzi-forschungszentrum-informatik/vdb_mapping)
+The VDB Mapping ROS Package is a ROS wrapper around [VDB Mapping](https://github.com/fzi-forschungszentrum-informatik/vdb_mapping)
 
 ## Getting Started
 
@@ -17,10 +17,10 @@ Instead you have to use [catkin build](https://catkin-tools.readthedocs.io/en/la
 
 ``` bash
 # source global ros
-source /opt/ros/<your_ros_version>/setub.bash
+source /opt/ros/<your_ros_version>/setup.bash
 
 # create a catkin workspace
-mkdir -p ~/catkin_ws/src && cd catkin_ws
+mkdir -p ~/catkin_ws/src && cd ~/catkin_ws/src
 
 # clone packages
 git clone https://github.com/fzi-forschungszentrum-informatik/vdb_mapping
@@ -29,19 +29,19 @@ git clone https://github.com/fzi-forschungszentrum-informatik/vdb_mapping_ros
 # install dependencies
 sudo apt update
 rosdep update
-rosdep install --from-patchs src --ignore-src -y
+rosdep install --from-paths src --ignore-src -y
 
 # build the workspace.  
 catkin build
 
 # source the workspace
-source deve/setup.bash
+source devel/setup.bash
 ```
 
 ## ROS API
 ### Advertised ROS Topics
 ``` 
-~/vdb_map_visualization (type: visualization_msgs/Marker )
+~/vdb_map_visualization (type: visualization_msgs/Marker)
 ```
 Publishes the resulting map as voxel marker
 
@@ -56,17 +56,17 @@ Subscriber for pointclouds which are already aligned to a specific frame
 Subscriber for pointclouds in sensor coordinates
 
 ### ROS Parameters
-All parameters can be passed as commandline argument to the launch file.
+All parameters can be passed as commandline arguments to the launch file.
 | Parameter Name | Type | Default | Information
 | -------------- | ---- | ------- | -----------
 | aligned_points | string | scan_matched_points2 | Pointclouds which are already aligned to a specific frame (e.g. /map)
 | raw_points     | string | raw_points           | Pointclouds in sensor frame
-| sensor_frame   | string | velodyne             | Sensor Frame for raycasting aligned pointclouds
+| sensor_frame   | string | velodyne             | Sensor frame for raycasting aligned pointclouds
 | map_frame      | string | map                  | Coordinate frame of the map
-| max_range      | double | 10.0                 | Maximal raycasting range
+| max_range      | double | 10.0                 | Maximum raycasting range
 | resolution     | double | 0.07                 | Map resolution
 | prob_hit       | double | 0.8                  | Probability update if a beam hits a voxel
-| prob_miss      | double | 0.1                  | Probability update if a beam misses a vox
+| prob_miss      | double | 0.1                  | Probability update if a beam misses a voxel
 | prob_thres_min | double | 0.12                 | Lower occupancy threshold of a voxel
 | prob_thres_max | double | 0.8                  | Upper occupancy threshold of a voxel
 
