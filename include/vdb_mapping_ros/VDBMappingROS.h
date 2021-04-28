@@ -88,11 +88,8 @@ public:
 
   /*!
    * \brief Publishes a marker array and pointcloud representation of the map
-   *
-   * \param grid Pointer to the VDB grid
-   * \param frame_id Frame id of the map
    */
-  void publishMap(const openvdb::FloatGrid::Ptr grid, const std::string frame_id);
+  void publishMap() const;
 
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
@@ -102,7 +99,7 @@ public:
    *
    * \returns RGBA color of the grid cell
    */
-  std_msgs::ColorRGBA heightColorCoding(const double height);
+  std_msgs::ColorRGBA heightColorCoding(const double height) const;
 
 
 private:

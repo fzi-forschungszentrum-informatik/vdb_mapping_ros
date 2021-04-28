@@ -77,7 +77,7 @@ void VDBMappingROS::resetMap()
 {
   ROS_INFO_STREAM("Reseting Map");
   m_vdb_map->resetMap();
-  publishMap(m_vdb_map->getMap(), m_map_frame);
+  publishMap();
 }
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
@@ -148,15 +148,18 @@ void VDBMappingROS::insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
   // Integrate data into vdb grid
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
-  publishMap(m_vdb_map->getMap(), m_map_frame);
+  publishMap();
 }
 
-void VDBMappingROS::publishMap(const openvdb::FloatGrid::Ptr grid, const std::string frame_id)
+void VDBMappingROS::publishMap() const
 {
   if (!(m_publish_pointcloud || m_publish_vis_marker))
   {
     return;
   }
+
+  openvdb::FloatGrid::Ptr grid = m_vdb_map->getMap();
+
   bool publish_vis_marker;
   publish_vis_marker = (m_publish_vis_marker && m_visualization_marker_pub.getNumSubscribers() > 0);
   bool publish_pointcloud;
@@ -197,7 +200,7 @@ void VDBMappingROS::publishMap(const openvdb::FloatGrid::Ptr grid, const std::st
   if (publish_vis_marker)
   {
     double size                             = m_resolution;
-    visualization_marker.header.frame_id    = frame_id;
+    visualization_marker.header.frame_id    = m_map_frame;
     visualization_marker.header.stamp       = ros::Time::now();
     visualization_marker.id                 = 0;
     visualization_marker.type               = visualization_msgs::Marker::CUBE_LIST;
@@ -224,14 +227,14 @@ void VDBMappingROS::publishMap(const openvdb::FloatGrid::Ptr grid, const std::st
     cloud->height = 1;
     sensor_msgs::PointCloud2 cloud_msg;
     pcl::toROSMsg(*cloud, cloud_msg);
-    cloud_msg.header.frame_id = frame_id;
+    cloud_msg.header.frame_id = m_map_frame;
     cloud_msg.header.stamp    = ros::Time::now();
     m_pointcloud_pub.publish(cloud_msg);
   }
 }
 
 // Conversion from Hue to RGB Value
-std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double height)
+std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double height) const
 {
   // The factor of 0.8 is only for a nicer color range
   double h = height * 0.8;
