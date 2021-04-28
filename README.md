@@ -44,6 +44,10 @@ source devel/setup.bash
 ~/vdb_map_visualization (type: visualization_msgs/Marker)
 ```
 Publishes the resulting map as voxel marker
+``` 
+~/vdb_map_pointcloud (type: sensor_msgs/PointCloud2)
+```
+Publishes the resulting map as pointcloud 
 
 ### Subscribed ROS Topics
 ```
@@ -57,18 +61,21 @@ Subscriber for pointclouds in sensor coordinates
 
 ### ROS Parameters
 All parameters can be passed as commandline arguments to the launch file.
-| Parameter Name | Type | Default | Information
-| -------------- | ---- | ------- | -----------
-| aligned_points | string | scan_matched_points2 | Pointclouds which are already aligned to a specific frame (e.g. /map)
-| raw_points     | string | raw_points           | Pointclouds in sensor frame
-| sensor_frame   | string | velodyne             | Sensor frame for raycasting aligned pointclouds
-| map_frame      | string | map                  | Coordinate frame of the map
-| max_range      | double | 10.0                 | Maximum raycasting range
-| resolution     | double | 0.07                 | Map resolution
-| prob_hit       | double | 0.8                  | Probability update if a beam hits a voxel
-| prob_miss      | double | 0.1                  | Probability update if a beam misses a voxel
-| prob_thres_min | double | 0.12                 | Lower occupancy threshold of a voxel
-| prob_thres_max | double | 0.8                  | Upper occupancy threshold of a voxel
+| Parameter Name     | Type    | Default              | Information
+| ------------------ | ------- | -------------------- | -----------
+| aligned_points     | string  | scan_matched_points2 | Pointclouds which are already aligned to a specific frame (e.g. /map)
+| raw_points         | string  | raw_points           | Pointclouds in sensor frame
+| sensor_frame       | string  | velodyne             | Sensor frame for raycasting aligned pointclouds
+| map_frame          | string  | map                  | Coordinate frame of the map
+| max_range          | double  | 10.0                 | Maximum raycasting range
+| resolution         | double  | 0.07                 | Map resolution
+| prob_hit           | double  | 0.8                  | Probability update if a beam hits a voxel
+| prob_miss          | double  | 0.1                  | Probability update if a beam misses a voxel
+| prob_thres_min     | double  | 0.12                 | Lower occupancy threshold of a voxel
+| prob_thres_max     | double  | 0.8                  | Upper occupancy threshold of a voxel
+| publish_pointcloud | boolean | true                 | Specify whether the map should be published as pointcloud
+| publish_vis_marker | boolean | true                 | Specify whether the map should be published as visual marker 
+
 
 ## Acknowledgement
 

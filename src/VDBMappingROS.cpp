@@ -44,6 +44,9 @@ VDBMappingROS::VDBMappingROS()
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
 
+  m_priv_nh.param<bool>("publish_pointcloud", m_publish_pointcloud, true);
+  m_priv_nh.param<bool>("publish_vis_marker", m_publish_vis_marker, true);
+
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame.empty())
   {
@@ -65,14 +68,16 @@ VDBMappingROS::VDBMappingROS()
   m_aligned_cloud_sub =
     m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
 
-  m_vis_pub = m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
+  m_visualization_marker_pub =
+    m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
+  m_pointcloud_pub = m_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
 }
 
 void VDBMappingROS::resetMap()
 {
   ROS_INFO_STREAM("Reseting Map");
   m_vdb_map->resetMap();
-  visualizeMap();
+  publishMap();
 }
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
@@ -143,19 +148,25 @@ void VDBMappingROS::insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
   // Integrate data into vdb grid
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
-  visualizeMap();
+  publishMap();
 }
 
-void VDBMappingROS::visualizeMap()
+void VDBMappingROS::publishMap() const
 {
-  // Create and publish marker visualization
-  m_vis_pub.publish(createVDBVisualization(m_vdb_map->getMap(), m_map_frame));
-}
+  if (!(m_publish_pointcloud || m_publish_vis_marker))
+  {
+    return;
+  }
 
-visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::FloatGrid::Ptr grid,
-                                                                 const std::string frame_id)
-{
-  visualization_msgs::Marker occupied_nodes_vis;
+  openvdb::FloatGrid::Ptr grid = m_vdb_map->getMap();
+
+  bool publish_vis_marker;
+  publish_vis_marker = (m_publish_vis_marker && m_visualization_marker_pub.getNumSubscribers() > 0);
+  bool publish_pointcloud;
+  publish_pointcloud = (m_publish_pointcloud && m_pointcloud_pub.getNumSubscribers() > 0);
+
+  visualization_msgs::Marker visualization_marker;
+  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
   double min_z, max_z;
@@ -164,48 +175,66 @@ visualization_msgs::Marker VDBMappingROS::createVDBVisualization(const openvdb::
 
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
-
-
   for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
 
-    geometry_msgs::Point cube_center;
-    cube_center.x = world_coord.x();
-    cube_center.y = world_coord.y();
-    cube_center.z = world_coord.z();
-
-    occupied_nodes_vis.points.push_back(cube_center);
-    // Calculate the relative height of each voxel.
-    double h = (1.0 - ((cube_center.z - min_z) / (max_z - min_z)));
-    occupied_nodes_vis.colors.push_back(heightColorCoding(h));
+    if (publish_vis_marker)
+    {
+      geometry_msgs::Point cube_center;
+      cube_center.x = world_coord.x();
+      cube_center.y = world_coord.y();
+      cube_center.z = world_coord.z();
+      visualization_marker.points.push_back(cube_center);
+      // Calculate the relative height of each voxel.
+      double h = (1.0 - ((world_coord.z() - min_z) / (max_z - min_z)));
+      visualization_marker.colors.push_back(heightColorCoding(h));
+    }
+    if (publish_pointcloud)
+    {
+      cloud->points.push_back(
+        VDBMapping::PointT(world_coord.x(), world_coord.y(), world_coord.z()));
+    }
   }
 
-  double size                           = m_resolution;
-  occupied_nodes_vis.header.frame_id    = frame_id;
-  occupied_nodes_vis.header.stamp       = ros::Time::now();
-  occupied_nodes_vis.id                 = 0;
-  occupied_nodes_vis.type               = visualization_msgs::Marker::CUBE_LIST;
-  occupied_nodes_vis.scale.x            = size;
-  occupied_nodes_vis.scale.y            = size;
-  occupied_nodes_vis.scale.z            = size;
-  occupied_nodes_vis.color.a            = 1.0;
-  occupied_nodes_vis.pose.orientation.w = 1.0;
-  occupied_nodes_vis.frame_locked       = true;
-
-  if (occupied_nodes_vis.points.size() > 0)
+  if (publish_vis_marker)
   {
-    occupied_nodes_vis.action = visualization_msgs::Marker::ADD;
+    double size                             = m_resolution;
+    visualization_marker.header.frame_id    = m_map_frame;
+    visualization_marker.header.stamp       = ros::Time::now();
+    visualization_marker.id                 = 0;
+    visualization_marker.type               = visualization_msgs::Marker::CUBE_LIST;
+    visualization_marker.scale.x            = size;
+    visualization_marker.scale.y            = size;
+    visualization_marker.scale.z            = size;
+    visualization_marker.color.a            = 1.0;
+    visualization_marker.pose.orientation.w = 1.0;
+    visualization_marker.frame_locked       = true;
+
+    if (visualization_marker.points.size() > 0)
+    {
+      visualization_marker.action = visualization_msgs::Marker::ADD;
+    }
+    else
+    {
+      visualization_marker.action = visualization_msgs::Marker::DELETE;
+    }
+    m_visualization_marker_pub.publish(visualization_marker);
   }
-  else
+  if (publish_pointcloud)
   {
-    occupied_nodes_vis.action = visualization_msgs::Marker::DELETE;
+    cloud->width  = cloud->points.size();
+    cloud->height = 1;
+    sensor_msgs::PointCloud2 cloud_msg;
+    pcl::toROSMsg(*cloud, cloud_msg);
+    cloud_msg.header.frame_id = m_map_frame;
+    cloud_msg.header.stamp    = ros::Time::now();
+    m_pointcloud_pub.publish(cloud_msg);
   }
-  return occupied_nodes_vis;
 }
 
 // Conversion from Hue to RGB Value
-std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double height)
+std_msgs::ColorRGBA VDBMappingROS::heightColorCoding(const double height) const
 {
   // The factor of 0.8 is only for a nicer color range
   double h = height * 0.8;

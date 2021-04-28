@@ -85,21 +85,12 @@ public:
   void insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
                         const geometry_msgs::TransformStamped transform);
 
-  /*!
-   * \brief Publishes a visualization of the map as a marker topic
-   */
-  void visualizeMap();
 
   /*!
-   * \brief Creates a Marker from the generated VDB map
-   *
-   * \param grid Pointer to VDB Grid
-   * \param frame_id Frame id of the map
-   *
-   * \returns Marker containing all grid cells
+   * \brief Publishes a marker array and pointcloud representation of the map
    */
-  visualization_msgs::Marker createVDBVisualization(const openvdb::FloatGrid::Ptr grid,
-                                                    const std::string frame_id);
+  void publishMap() const;
+
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
    *
@@ -108,7 +99,7 @@ public:
    *
    * \returns RGBA color of the grid cell
    */
-  std_msgs::ColorRGBA heightColorCoding(const double height);
+  std_msgs::ColorRGBA heightColorCoding(const double height) const;
 
 
 private:
@@ -135,7 +126,12 @@ private:
   /*!
    * \brief Publisher for the marker array
    */
-  ros::Publisher m_vis_pub;
+  ros::Publisher m_visualization_marker_pub;
+
+  /*!
+   * \brief Publisher for the point cloud
+   */
+  ros::Publisher m_pointcloud_pub;
 
   /*!
    * \brief Transformation buffer
@@ -171,6 +167,16 @@ private:
    * \brief Map configuration
    */
   VDBMapping::Config m_config;
+
+  /*!
+   * \brief Specifies whether a pointcloud should be published or not
+   */
+  bool m_publish_pointcloud;
+
+  /*!
+   * \brief Specifies whether the map should be published as markers or not
+   */
+  bool m_publish_vis_marker;
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */
