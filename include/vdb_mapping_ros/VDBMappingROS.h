@@ -176,7 +176,7 @@ private:
    * \brief Specifies whether the map should be published as markers or not
    */
   bool m_publish_vis_marker;
-  VDBMapping<>::Config m_config;
+  OccupancyVDBMapping::Config m_config;
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */
