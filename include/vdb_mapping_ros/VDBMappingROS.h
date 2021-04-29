@@ -31,7 +31,7 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 
-#include <vdb_mapping/VDBMapping.h>
+#include <vdb_mapping/OccupancyVDBMapping.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
@@ -82,20 +82,15 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void insertPointCloud(const VDBMapping<>::PointCloudT::Ptr cloud,
+  void insertPointCloud(const OccupancyVDBMapping::PointCloudT::Ptr cloud,
                         const geometry_msgs::TransformStamped transform);
 
 
   /*!
    * \brief Publishes a marker array and pointcloud representation of the map
    */
-<<<<<<< HEAD
   void publishMap() const;
 
-=======
-  visualization_msgs::Marker createVDBVisualization(const VDBMapping<>::GridT::Ptr grid,
-                                                    const std::string frame_id);
->>>>>>> updated floatgrid to templated vdbgrid
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
    *
@@ -166,7 +161,7 @@ private:
   /*!
    * \brief Map pointer
    */
-  std::unique_ptr<VDBMapping<> > m_vdb_map;
+  std::unique_ptr<OccupancyVDBMapping> m_vdb_map;
 
   /*!
    * \brief Map configuration
