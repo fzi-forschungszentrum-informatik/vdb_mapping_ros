@@ -175,7 +175,9 @@ void VDBMappingROS::publishMap() const
 
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
-  for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
+
+
+  for (VDBMapping<>::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
 

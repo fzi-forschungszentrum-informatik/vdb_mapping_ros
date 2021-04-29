@@ -89,8 +89,13 @@ public:
   /*!
    * \brief Publishes a marker array and pointcloud representation of the map
    */
+<<<<<<< HEAD
   void publishMap() const;
 
+=======
+  visualization_msgs::Marker createVDBVisualization(const VDBMapping<>::GridT::Ptr grid,
+                                                    const std::string frame_id);
+>>>>>>> updated floatgrid to templated vdbgrid
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
    *
