@@ -169,7 +169,8 @@ void VDBMappingROS::publishMap() const
   publish_pointcloud = (m_publish_pointcloud && m_pointcloud_pub.getNumSubscribers() > 0);
 
   visualization_msgs::Marker visualization_marker;
-  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
   double min_z, max_z;
@@ -198,8 +199,8 @@ void VDBMappingROS::publishMap() const
     }
     if (publish_pointcloud)
     {
-      cloud->points.push_back(
-        VDBMapping::PointT(world_coord.x(), world_coord.y(), world_coord.z()));
+      cloud->points.push_back(vdb_mapping::OccupancyVDBMapping::PointT(
+        world_coord.x(), world_coord.y(), world_coord.z()));
     }
   }
 
