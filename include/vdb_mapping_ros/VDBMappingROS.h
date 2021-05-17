@@ -83,7 +83,7 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void insertPointCloud(const OccupancyVDBMapping::PointCloudT::Ptr cloud,
+  void insertPointCloud(const vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud,
                         const geometry_msgs::TransformStamped transform);
 
 
@@ -162,7 +162,7 @@ private:
   /*!
    * \brief Map pointer
    */
-  std::unique_ptr<OccupancyVDBMapping> m_vdb_map;
+  std::unique_ptr<vdb_mapping::OccupancyVDBMapping> m_vdb_map;
 
   /*!
    * \brief Map configuration
@@ -177,7 +177,7 @@ private:
    * \brief Specifies whether the map should be published as markers or not
    */
   bool m_publish_vis_marker;
-  OccupancyVDBMapping::Config m_config;
+  vdb_mapping::Config m_config;
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */

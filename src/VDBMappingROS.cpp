@@ -34,7 +34,7 @@ VDBMappingROS::VDBMappingROS()
   , m_tf_listener(m_tf_buffer)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
-  m_vdb_map = std::make_unique<OccupancyVDBMapping>(m_resolution);
+  m_vdb_map = std::make_unique<vdb_mapping::OccupancyVDBMapping>(m_resolution);
 
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
@@ -83,7 +83,8 @@ void VDBMappingROS::resetMap()
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  OccupancyVDBMapping::PointCloudT::Ptr cloud(new OccupancyVDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
   geometry_msgs::TransformStamped sensor_to_map_tf;
   try
@@ -121,7 +122,8 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
 
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  OccupancyVDBMapping::PointCloudT::Ptr cloud(new OccupancyVDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
   geometry_msgs::TransformStamped sensor_to_map_tf;
@@ -143,7 +145,7 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   insertPointCloud(cloud, sensor_to_map_tf);
 }
 
-void VDBMappingROS::insertPointCloud(const OccupancyVDBMapping::PointCloudT::Ptr cloud,
+void VDBMappingROS::insertPointCloud(const vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud,
                                      const geometry_msgs::TransformStamped transform)
 {
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
@@ -178,7 +180,8 @@ void VDBMappingROS::publishMap() const
   max_z = max_world_coord.z();
 
 
-  for (OccupancyVDBMapping::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
+  for (vdb_mapping::OccupancyVDBMapping::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter;
+       ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
 
