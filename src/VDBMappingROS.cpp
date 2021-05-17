@@ -20,6 +20,7 @@
 /*!\file
  *
  * \author  Marvin Große Besselmann grosse@fzi.de
+ * \author  Lennart Puck puck@fzi.de
  * \date    2020-12-23
  *
  */
@@ -33,7 +34,7 @@ VDBMappingROS::VDBMappingROS()
   , m_tf_listener(m_tf_buffer)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
-  m_vdb_map = std::make_unique<VDBMapping>(m_resolution);
+  m_vdb_map = std::make_unique<vdb_mapping::OccupancyVDBMapping>(m_resolution);
 
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
@@ -82,7 +83,8 @@ void VDBMappingROS::resetMap()
 
 void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
   geometry_msgs::TransformStamped sensor_to_map_tf;
   try
@@ -120,7 +122,8 @@ void VDBMappingROS::alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPt
 
 void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
   geometry_msgs::TransformStamped sensor_to_map_tf;
@@ -142,7 +145,7 @@ void VDBMappingROS::sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr
   insertPointCloud(cloud, sensor_to_map_tf);
 }
 
-void VDBMappingROS::insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
+void VDBMappingROS::insertPointCloud(const vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud,
                                      const geometry_msgs::TransformStamped transform)
 {
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
@@ -166,7 +169,8 @@ void VDBMappingROS::publishMap() const
   publish_pointcloud = (m_publish_pointcloud && m_pointcloud_pub.getNumSubscribers() > 0);
 
   visualization_msgs::Marker visualization_marker;
-  VDBMapping::PointCloudT::Ptr cloud(new VDBMapping::PointCloudT);
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
   double min_z, max_z;
@@ -175,7 +179,10 @@ void VDBMappingROS::publishMap() const
 
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
-  for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
+
+
+  for (vdb_mapping::OccupancyVDBMapping::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter;
+       ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
 
@@ -192,8 +199,8 @@ void VDBMappingROS::publishMap() const
     }
     if (publish_pointcloud)
     {
-      cloud->points.push_back(
-        VDBMapping::PointT(world_coord.x(), world_coord.y(), world_coord.z()));
+      cloud->points.push_back(vdb_mapping::OccupancyVDBMapping::PointT(
+        world_coord.x(), world_coord.y(), world_coord.z()));
     }
   }
 

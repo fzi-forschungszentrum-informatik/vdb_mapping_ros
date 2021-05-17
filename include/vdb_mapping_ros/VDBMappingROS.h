@@ -20,6 +20,7 @@
 /*!\file
  *
  * \author  Marvin Große Besselmann grosse@fzi.de
+ * \author  Lennart Puck puck@fzi.de
  * \date    2020-12-23
  *
  */
@@ -31,7 +32,7 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 
-#include <vdb_mapping/VDBMapping.h>
+#include <vdb_mapping/OccupancyVDBMapping.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
@@ -82,7 +83,7 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void insertPointCloud(const VDBMapping::PointCloudT::Ptr cloud,
+  void insertPointCloud(const vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud,
                         const geometry_msgs::TransformStamped transform);
 
 
@@ -161,12 +162,11 @@ private:
   /*!
    * \brief Map pointer
    */
-  std::unique_ptr<VDBMapping> m_vdb_map;
+  std::unique_ptr<vdb_mapping::OccupancyVDBMapping> m_vdb_map;
 
   /*!
    * \brief Map configuration
    */
-  VDBMapping::Config m_config;
 
   /*!
    * \brief Specifies whether a pointcloud should be published or not
@@ -177,6 +177,7 @@ private:
    * \brief Specifies whether the map should be published as markers or not
    */
   bool m_publish_vis_marker;
+  vdb_mapping::Config m_config;
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */
