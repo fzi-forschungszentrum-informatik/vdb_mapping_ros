@@ -31,6 +31,9 @@
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <std_msgs/String.h>
+
+#include <openvdb/io/Stream.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
@@ -90,6 +93,8 @@ public:
    */
   void publishMap() const;
 
+  void publishUpdate(openvdb::FloatGrid::Ptr update) const;
+
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
    *
@@ -131,6 +136,8 @@ private:
    * \brief Publisher for the point cloud
    */
   ros::Publisher m_pointcloud_pub;
+
+  ros::Publisher m_update_pub;
 
   /*!
    * \brief Transformation buffer
@@ -175,6 +182,9 @@ private:
    * \brief Specifies whether the map should be published as markers or not
    */
   bool m_publish_vis_marker;
+
+  bool m_publish_updates;
+
   vdb_mapping::Config m_config;
 };
 

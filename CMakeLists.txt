@@ -45,7 +45,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -66,6 +65,14 @@ target_link_libraries(${PROJECT_NAME}_node
   vdb_mapping::vdb_mapping
   ${catkin_LIBRARIES}
 )
+
+add_executable(remote_vdb_mapping_ros_node src/remote_vdb_mapping_ros_node.cpp)
+add_dependencies(remote_vdb_mapping_ros_node ${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(remote_vdb_mapping_ros_node
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
+)
+
 
 #############
 ## Install ##

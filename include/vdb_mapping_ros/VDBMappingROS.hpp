@@ -48,6 +48,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_priv_nh.param<bool>("publish_pointcloud", m_publish_pointcloud, true);
   m_priv_nh.param<bool>("publish_vis_marker", m_publish_vis_marker, true);
+  m_priv_nh.param<bool>("publish_updates", m_publish_updates, true);
 
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame.empty())
@@ -73,6 +74,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_visualization_marker_pub =
     m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
   m_pointcloud_pub = m_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
+
+  m_update_pub = m_nh.advertise<std_msgs::String>("vdb_map_update", 1, true);
 }
 
 template <typename VDBMappingT>
@@ -156,8 +159,34 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
 {
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
   // Integrate data into vdb grid
-  m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
+  // m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
+
+  openvdb::FloatGrid::Ptr update = m_vdb_map->createUpdate(cloud, sensor_to_map_eigen);
+
+
+  // TODO publish map update
+
+  if (m_publish_updates)
+  {
+    publishUpdate(update);
+  }
+
+  m_vdb_map->updateMap(update);
+
+
   publishMap();
+}
+
+template <typename VDBMappingT>
+void VDBMappingROS<VDBMappingT>::publishUpdate(openvdb::FloatGrid::Ptr update) const
+{
+  openvdb::GridPtrVec grids;
+  grids.push_back(update);
+  std::ostringstream oss(std::ios_base::binary);
+  openvdb::io::Stream(oss).write(grids);
+  std_msgs::String msg;
+  msg.data = oss.str();
+  m_update_pub.publish(msg);
 }
 
 template <typename VDBMappingT>
