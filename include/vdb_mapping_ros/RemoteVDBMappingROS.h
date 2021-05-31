@@ -41,10 +41,22 @@
 class RemoteVDBMappingROS
 {
 public:
+  /*!
+   * \brief Creates a new RemoteVDBMappingROS instance
+   */
   RemoteVDBMappingROS();
   virtual ~RemoteVDBMappingROS(){};
 
+  /*!
+   * \brief Callback that listens to map updates from the VDBMappingROS side
+   *
+   * \param update_msg Update grid encoded as serialized string
+   */
   void updateCallback(const std_msgs::String::ConstPtr& update_msg);
+
+  /*!
+   * \brief Publishes a marker array and pointcloud representation of the map
+   */
   void publishMap() const;
   std_msgs::ColorRGBA heightColorCoding(const double height) const;
 
