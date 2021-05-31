@@ -203,7 +203,6 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   sensor_msgs::PointCloud2 bla;
 
   VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
-                                           m_resolution,
                                            m_map_frame,
                                            visualization_marker,
                                            bla,

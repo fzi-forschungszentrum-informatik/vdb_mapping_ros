@@ -27,7 +27,6 @@
 #include <vdb_mapping_ros/VDBMappingTools.h>
 
 void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid,
-                                              const double resolution,
                                               const std::string frame_id,
                                               visualization_msgs::Marker& marker_msg,
                                               sensor_msgs::PointCloud2& cloud_msg,
@@ -71,7 +70,7 @@ void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid
 
   if (create_marker)
   {
-    double size                   = resolution;
+    double size                   = grid->transform().voxelSize()[0];
     marker_msg.header.frame_id    = frame_id;
     marker_msg.header.stamp       = ros::Time::now();
     marker_msg.id                 = 0;

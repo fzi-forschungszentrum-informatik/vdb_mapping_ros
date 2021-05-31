@@ -89,7 +89,6 @@ void RemoteVDBMappingROS::publishMap() const
   sensor_msgs::PointCloud2 pointcloud_msg;
 
   VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
-                                           m_resolution,
                                            m_map_frame,
                                            visualization_marker_msg,
                                            pointcloud_msg,

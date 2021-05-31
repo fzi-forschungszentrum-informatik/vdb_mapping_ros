@@ -56,7 +56,6 @@ public:
    * \param create_pointcloud Flag specifying to create a pointcloud message
    */
   static void createVisualizationMsgs(openvdb::FloatGrid::Ptr grid,
-                                      const double resolution,
                                       const std::string frame_id,
                                       visualization_msgs::Marker& marker_msg,
                                       sensor_msgs::PointCloud2& cloud_msg,
