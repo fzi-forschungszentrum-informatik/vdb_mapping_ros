@@ -159,12 +159,7 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
 {
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
   // Integrate data into vdb grid
-  // m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen);
-
   openvdb::FloatGrid::Ptr update = m_vdb_map->createUpdate(cloud, sensor_to_map_eigen);
-
-
-  // TODO publish map update
 
   if (m_publish_updates)
   {
@@ -172,7 +167,6 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   }
 
   m_vdb_map->updateMap(update);
-
 
   publishMap();
 }
@@ -205,118 +199,23 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   publish_pointcloud = (m_publish_pointcloud && m_pointcloud_pub.getNumSubscribers() > 0);
 
   visualization_msgs::Marker visualization_marker;
-  typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
 
-  openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
-  double min_z, max_z;
-  openvdb::Vec3d min_world_coord = grid->indexToWorld(bbox.getStart());
-  openvdb::Vec3d max_world_coord = grid->indexToWorld(bbox.getEnd());
+  sensor_msgs::PointCloud2 bla;
 
-  min_z = min_world_coord.z();
-  max_z = max_world_coord.z();
-
-
-  for (typename VDBMappingT::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
-  {
-    openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
-
-    if (publish_vis_marker)
-    {
-      geometry_msgs::Point cube_center;
-      cube_center.x = world_coord.x();
-      cube_center.y = world_coord.y();
-      cube_center.z = world_coord.z();
-      visualization_marker.points.push_back(cube_center);
-      // Calculate the relative height of each voxel.
-      double h = (1.0 - ((world_coord.z() - min_z) / (max_z - min_z)));
-      visualization_marker.colors.push_back(heightColorCoding(h));
-    }
-    if (publish_pointcloud)
-    {
-      cloud->points.push_back(
-        typename VDBMappingT::PointT(world_coord.x(), world_coord.y(), world_coord.z()));
-    }
-  }
+  VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
+                                           m_resolution,
+                                           m_map_frame,
+                                           visualization_marker,
+                                           bla,
+                                           publish_vis_marker,
+                                           publish_pointcloud);
 
   if (publish_vis_marker)
   {
-    double size                             = m_resolution;
-    visualization_marker.header.frame_id    = m_map_frame;
-    visualization_marker.header.stamp       = ros::Time::now();
-    visualization_marker.id                 = 0;
-    visualization_marker.type               = visualization_msgs::Marker::CUBE_LIST;
-    visualization_marker.scale.x            = size;
-    visualization_marker.scale.y            = size;
-    visualization_marker.scale.z            = size;
-    visualization_marker.color.a            = 1.0;
-    visualization_marker.pose.orientation.w = 1.0;
-    visualization_marker.frame_locked       = true;
-
-    if (visualization_marker.points.size() > 0)
-    {
-      visualization_marker.action = visualization_msgs::Marker::ADD;
-    }
-    else
-    {
-      visualization_marker.action = visualization_msgs::Marker::DELETE;
-    }
     m_visualization_marker_pub.publish(visualization_marker);
   }
   if (publish_pointcloud)
   {
-    cloud->width  = cloud->points.size();
-    cloud->height = 1;
-    sensor_msgs::PointCloud2 cloud_msg;
-    pcl::toROSMsg(*cloud, cloud_msg);
-    cloud_msg.header.frame_id = m_map_frame;
-    cloud_msg.header.stamp    = ros::Time::now();
-    m_pointcloud_pub.publish(cloud_msg);
-  }
-}
-
-// Conversion from Hue to RGB Value
-template <typename VDBMappingT>
-std_msgs::ColorRGBA VDBMappingROS<VDBMappingT>::heightColorCoding(const double height) const
-{
-  // The factor of 0.8 is only for a nicer color range
-  double h = height * 0.8;
-
-  int i    = (int)(h * 6.0);
-  double f = (h * 6.0) - i;
-  double q = (1.0 - f);
-  i %= 6;
-
-  auto toMsg = [](double v1, double v2, double v3) {
-    std_msgs::ColorRGBA rgba;
-    rgba.a = 1.0;
-    rgba.r = v1;
-    rgba.g = v2;
-    rgba.b = v3;
-    return rgba;
-  };
-
-  switch (i)
-  {
-    case 0:
-      return toMsg(1.0, f, 0.0);
-      break;
-    case 1:
-      return toMsg(q, 1.0, 0.0);
-      break;
-    case 2:
-      return toMsg(0.0, 1.0, f);
-      break;
-    case 3:
-      return toMsg(0.0, q, 1.0);
-      break;
-    case 4:
-      return toMsg(f, 0.0, 1.0);
-      break;
-    case 5:
-      return toMsg(1.0, 0.0, q);
-      break;
-    default:
-      return toMsg(1.0, 0.5, 0.5);
-      break;
+    m_visualization_marker_pub.publish(bla);
   }
 }

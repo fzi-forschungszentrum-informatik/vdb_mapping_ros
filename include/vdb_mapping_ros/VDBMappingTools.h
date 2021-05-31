@@ -28,23 +28,49 @@
 #ifndef VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED
 #define VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED
 
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
-#include <visualization_msgs/Marker.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <vdb_mapping/OccupancyVDBMapping.h>
+#include <visualization_msgs/Marker.h>
 
+/*!
+ * \brief Collection of VDBMapping helper functions and tools
+ */
 class VDBMappingTools
 {
 public:
   VDBMappingTools(){};
   virtual ~VDBMappingTools(){};
 
+  /*!
+   * \brief Creates visualization msgs for pointcloud and marker arrays
+   *
+   * \param grid Map grid
+   * \param resolution Resolution of the grid
+   * \param frame_id Frame ID of the grid
+   * \param marker_msg Output Marker message
+   * \param cloud_msg Output Pointcloud message
+   * \param create_marker Flag specifying to create a marker message
+   * \param create_pointcloud Flag specifying to create a pointcloud message
+   */
   static void createVisualizationMsgs(openvdb::FloatGrid::Ptr grid,
-                                      visualization_msgs::Marker& marker,
-                                      sensor_msgs::PointCloud2& cloud,
-                                      bool createMarker,
-                                      bool createPointcloud);
+                                      const double resolution,
+                                      const std::string frame_id,
+                                      visualization_msgs::Marker& marker_msg,
+                                      sensor_msgs::PointCloud2& cloud_msg,
+                                      bool create_marker,
+                                      bool create_pointcloud);
 
+  /*!
+   * \brief Calculates a height correlating color coding using HSV color space
+   *
+   * \param height Gridcell height relativ to the min and max height of the complete grid. Parameter
+   * can take values between 0 and 1
+   *
+   * \returns RGBA color of the grid cell
+   */
   static std_msgs::ColorRGBA heightColorCoding(const double height);
 
 private:

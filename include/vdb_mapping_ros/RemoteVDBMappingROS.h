@@ -30,6 +30,7 @@
 
 #include <ros/ros.h>
 #include <vdb_mapping/OccupancyVDBMapping.h>
+#include <vdb_mapping_ros/VDBMappingTools.h>
 #include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -58,7 +59,6 @@ public:
    * \brief Publishes a marker array and pointcloud representation of the map
    */
   void publishMap() const;
-  std_msgs::ColorRGBA heightColorCoding(const double height) const;
 
 private:
   ros::NodeHandle m_nh;
@@ -71,7 +71,7 @@ private:
   bool m_publish_vis_marker;
   bool m_publish_pointcloud;
   std::string m_map_frame;
-  
+
   ros::Publisher m_pointcloud_pub;
   ros::Publisher m_visualization_marker_pub;
 

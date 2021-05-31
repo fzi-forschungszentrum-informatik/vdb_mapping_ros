@@ -26,16 +26,124 @@
 //----------------------------------------------------------------------
 #include <vdb_mapping_ros/VDBMappingTools.h>
 
-void VDBMappingTools::createVisualizationMsgs(openvdb::FloatGrid::Ptr grid,
-                                      visualization_msgs::Marker& marker,
-                                      sensor_msgs::PointCloud2& cloud,
-                                      bool createMarker,
-                                      bool createPointcloud)
+void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid,
+                                              const double resolution,
+                                              const std::string frame_id,
+                                              visualization_msgs::Marker& marker_msg,
+                                              sensor_msgs::PointCloud2& cloud_msg,
+                                              const bool create_marker,
+                                              const bool create_pointcloud)
 {
-  std::cout << "i visualize stuff" << std::endl;
+  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
+    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
+
+  openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
+  double min_z, max_z;
+  openvdb::Vec3d min_world_coord = grid->indexToWorld(bbox.getStart());
+  openvdb::Vec3d max_world_coord = grid->indexToWorld(bbox.getEnd());
+
+  min_z = min_world_coord.z();
+  max_z = max_world_coord.z();
+
+
+  for (vdb_mapping::OccupancyVDBMapping::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter;
+       ++iter)
+  {
+    openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
+
+    if (create_marker)
+    {
+      geometry_msgs::Point cube_center;
+      cube_center.x = world_coord.x();
+      cube_center.y = world_coord.y();
+      cube_center.z = world_coord.z();
+      marker_msg.points.push_back(cube_center);
+      // Calculate the relative height of each voxel.
+      double h = (1.0 - ((world_coord.z() - min_z) / (max_z - min_z)));
+      marker_msg.colors.push_back(heightColorCoding(h));
+    }
+    if (create_pointcloud)
+    {
+      cloud->points.push_back(vdb_mapping::OccupancyVDBMapping::PointT(
+        world_coord.x(), world_coord.y(), world_coord.z()));
+    }
+  }
+
+  if (create_marker)
+  {
+    double size                   = resolution;
+    marker_msg.header.frame_id    = frame_id;
+    marker_msg.header.stamp       = ros::Time::now();
+    marker_msg.id                 = 0;
+    marker_msg.type               = visualization_msgs::Marker::CUBE_LIST;
+    marker_msg.scale.x            = size;
+    marker_msg.scale.y            = size;
+    marker_msg.scale.z            = size;
+    marker_msg.color.a            = 1.0;
+    marker_msg.pose.orientation.w = 1.0;
+    marker_msg.frame_locked       = true;
+
+    if (marker_msg.points.size() > 0)
+    {
+      marker_msg.action = visualization_msgs::Marker::ADD;
+    }
+    else
+    {
+      marker_msg.action = visualization_msgs::Marker::DELETE;
+    }
+  }
+  if (create_pointcloud)
+  {
+    cloud->width  = cloud->points.size();
+    cloud->height = 1;
+    pcl::toROSMsg(*cloud, cloud_msg);
+    cloud_msg.header.frame_id = frame_id;
+    cloud_msg.header.stamp    = ros::Time::now();
+  }
 }
 
+// Conversion from Hue to RGB Value
 std_msgs::ColorRGBA VDBMappingTools::heightColorCoding(const double height)
 {
-  std::cout << " i do height" << std::endl;
+  // The factor of 0.8 is only for a nicer color range
+  double h = height * 0.8;
+
+  int i    = (int)(h * 6.0);
+  double f = (h * 6.0) - i;
+  double q = (1.0 - f);
+  i %= 6;
+
+  auto toMsg = [](double v1, double v2, double v3) {
+    std_msgs::ColorRGBA rgba;
+    rgba.a = 1.0;
+    rgba.r = v1;
+    rgba.g = v2;
+    rgba.b = v3;
+    return rgba;
+  };
+
+  switch (i)
+  {
+    case 0:
+      return toMsg(1.0, f, 0.0);
+      break;
+    case 1:
+      return toMsg(q, 1.0, 0.0);
+      break;
+    case 2:
+      return toMsg(0.0, 1.0, f);
+      break;
+    case 3:
+      return toMsg(0.0, q, 1.0);
+      break;
+    case 4:
+      return toMsg(f, 0.0, 1.0);
+      break;
+    case 5:
+      return toMsg(1.0, 0.0, q);
+      break;
+    default:
+      return toMsg(1.0, 0.5, 0.5);
+      break;
+  }
 }

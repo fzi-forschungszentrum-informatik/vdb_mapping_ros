@@ -33,6 +33,7 @@
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/String.h>
 
+#include <vdb_mapping_ros/VDBMappingTools.h>
 #include <openvdb/io/Stream.h>
 
 #include <tf2_eigen/tf2_eigen.h>
@@ -93,18 +94,12 @@ public:
    */
   void publishMap() const;
 
-  void publishUpdate(openvdb::FloatGrid::Ptr update) const;
-
   /*!
-   * \brief Calculates a height correlating color coding using HSV color space
+   * \brief Publishes a grid update as compressed serialized string
    *
-   * \param height Gridcell height relativ to the min and max height of the complete grid. Parameter
-   * can take values between 0 and 1
-   *
-   * \returns RGBA color of the grid cell
+   * \param update Update grid
    */
-  std_msgs::ColorRGBA heightColorCoding(const double height) const;
-
+  void publishUpdate(openvdb::FloatGrid::Ptr update) const;
 
 private:
   /*!
