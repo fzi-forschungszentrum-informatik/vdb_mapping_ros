@@ -4,9 +4,7 @@
 int main(int argc, char *argv[])
 {
   ros::init(argc,argv, "remote_mapping");
-  std::cout << "hi im a remote mapping node" << std::endl;
-
-  RemoteVDBMappingROS test;
+  RemoteVDBMappingROS remote_mapping_node;
   ros::spin();
   return 0;
 }

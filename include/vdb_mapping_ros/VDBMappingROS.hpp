@@ -196,23 +196,22 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   bool publish_pointcloud;
   publish_pointcloud = (m_publish_pointcloud && m_pointcloud_pub.getNumSubscribers() > 0);
 
-  visualization_msgs::Marker visualization_marker;
-
-  sensor_msgs::PointCloud2 bla;
+  visualization_msgs::Marker visualization_marker_msg;
+  sensor_msgs::PointCloud2 cloud_msg;
 
   VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
                                            m_map_frame,
-                                           visualization_marker,
-                                           bla,
+                                           visualization_marker_msg,
+                                           cloud_msg,
                                            publish_vis_marker,
                                            publish_pointcloud);
 
   if (publish_vis_marker)
   {
-    m_visualization_marker_pub.publish(visualization_marker);
+    m_visualization_marker_pub.publish(visualization_marker_msg);
   }
   if (publish_pointcloud)
   {
-    m_visualization_marker_pub.publish(bla);
+    m_pointcloud_pub.publish(cloud_msg);
   }
 }

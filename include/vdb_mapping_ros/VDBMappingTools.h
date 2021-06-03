@@ -71,8 +71,6 @@ public:
    * \returns RGBA color of the grid cell
    */
   static std_msgs::ColorRGBA heightColorCoding(const double height);
-
-private:
 };
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED */
