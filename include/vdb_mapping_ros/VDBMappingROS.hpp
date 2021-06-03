@@ -158,15 +158,13 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   const geometry_msgs::TransformStamped transform)
 {
   Eigen::Matrix<double, 3, 1> sensor_to_map_eigen = tf2::transformToEigen(transform).translation();
+  openvdb::FloatGrid::Ptr update;
   // Integrate data into vdb grid
-  openvdb::FloatGrid::Ptr update = m_vdb_map->createUpdate(cloud, sensor_to_map_eigen);
-
+  m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen, update);
   if (m_publish_updates)
   {
     publishUpdate(update);
   }
-
-  m_vdb_map->updateMap(update);
 
   publishMap();
 }
