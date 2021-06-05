@@ -32,8 +32,6 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 
-#include <vdb_mapping/OccupancyVDBMapping.h>
-
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
@@ -42,10 +40,10 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
-
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
+template <typename VDBMappingT>
 class VDBMappingROS
 {
 public:
@@ -83,7 +81,7 @@ public:
    * \param cloud Point cloud transformed into map coordinates
    * \param tf Sensor transform in map coordinates
    */
-  void insertPointCloud(const vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud,
+  void insertPointCloud(const typename VDBMappingT::PointCloudT::Ptr cloud,
                         const geometry_msgs::TransformStamped transform);
 
 
@@ -162,7 +160,7 @@ private:
   /*!
    * \brief Map pointer
    */
-  std::unique_ptr<vdb_mapping::OccupancyVDBMapping> m_vdb_map;
+  std::unique_ptr<VDBMappingT> m_vdb_map;
 
   /*!
    * \brief Map configuration
@@ -179,5 +177,7 @@ private:
   bool m_publish_vis_marker;
   vdb_mapping::Config m_config;
 };
+
+#include "VDBMappingROS.hpp"
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED */
