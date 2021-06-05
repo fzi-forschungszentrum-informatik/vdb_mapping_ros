@@ -26,14 +26,14 @@
 //----------------------------------------------------------------------
 
 #include <ros/ros.h>
+#include <vdb_mapping/OccupancyVDBMapping.h>
 #include <vdb_mapping_ros/VDBMappingROS.h>
 
 int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "vdb_mapping_node");
   ros::NodeHandle nh;
-  VDBMappingROS vdb_mapping;
+  VDBMappingROS<vdb_mapping::OccupancyVDBMapping> vdb_mapping;
   ros::spin();
-
   return 0;
 }
