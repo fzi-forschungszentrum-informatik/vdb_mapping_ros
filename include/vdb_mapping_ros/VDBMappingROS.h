@@ -30,11 +30,11 @@
 #define VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED
 
 #include <ros/ros.h>
-#include <visualization_msgs/Marker.h>
 #include <std_msgs/String.h>
+#include <visualization_msgs/Marker.h>
 
-#include <vdb_mapping_ros/VDBMappingTools.h>
 #include <openvdb/io/Stream.h>
+#include <vdb_mapping_ros/VDBMappingTools.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>

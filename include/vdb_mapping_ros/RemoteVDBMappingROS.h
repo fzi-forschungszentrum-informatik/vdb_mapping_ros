@@ -28,13 +28,13 @@
 #ifndef VDBMAPPING_REMOTE_VDBMAPPING_INCLUDED_H_
 #define VDBMAPPING_REMOTE_VDBMAPPING_INCLUDED_H_
 
-#include <ros/ros.h>
-#include <vdb_mapping_ros/VDBMappingTools.h>
-#include <std_msgs/String.h>
-#include <visualization_msgs/Marker.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <openvdb/openvdb.h>
 #include <openvdb/io/Stream.h>
+#include <openvdb/openvdb.h>
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <std_msgs/String.h>
+#include <vdb_mapping_ros/VDBMappingTools.h>
+#include <visualization_msgs/Marker.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -74,7 +74,6 @@ private:
 
   ros::Publisher m_pointcloud_pub;
   ros::Publisher m_visualization_marker_pub;
-
 };
 
 #include "RemoteVDBMappingROS.hpp"

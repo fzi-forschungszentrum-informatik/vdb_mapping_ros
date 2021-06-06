@@ -200,11 +200,11 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   sensor_msgs::PointCloud2 cloud_msg;
 
   VDBMappingTools<VDBMappingT>::createVisualizationMsgs(m_vdb_map->getMap(),
-                                           m_map_frame,
-                                           visualization_marker_msg,
-                                           cloud_msg,
-                                           publish_vis_marker,
-                                           publish_pointcloud);
+                                                        m_map_frame,
+                                                        visualization_marker_msg,
+                                                        cloud_msg,
+                                                        publish_vis_marker,
+                                                        publish_pointcloud);
 
   if (publish_vis_marker)
   {
