@@ -32,12 +32,12 @@
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <vdb_mapping/OccupancyVDBMapping.h>
 #include <visualization_msgs/Marker.h>
 
 /*!
  * \brief Collection of VDBMapping helper functions and tools
  */
+template <typename VDBMappingT>
 class VDBMappingTools
 {
 public:
@@ -55,7 +55,7 @@ public:
    * \param create_marker Flag specifying to create a marker message
    * \param create_pointcloud Flag specifying to create a pointcloud message
    */
-  static void createVisualizationMsgs(openvdb::FloatGrid::Ptr grid,
+  static void createVisualizationMsgs(typename VDBMappingT::GridT::Ptr grid,
                                       const std::string frame_id,
                                       visualization_msgs::Marker& marker_msg,
                                       sensor_msgs::PointCloud2& cloud_msg,
@@ -72,5 +72,7 @@ public:
    */
   static std_msgs::ColorRGBA heightColorCoding(const double height);
 };
+
+#include "VDBMappingTools.hpp"
 
 #endif /* VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED */

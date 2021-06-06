@@ -27,13 +27,14 @@
 
 #include <vdb_mapping_ros/RemoteVDBMappingROS.h>
 
-RemoteVDBMappingROS::RemoteVDBMappingROS()
+template <typename VDBMappingT>
+RemoteVDBMappingROS<VDBMappingT>::RemoteVDBMappingROS()
   : m_priv_nh("~")
 {
   openvdb::initialize();
 
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
-  m_vdb_map = std::make_unique<vdb_mapping::OccupancyVDBMapping>(m_resolution);
+  m_vdb_map = std::make_unique<VDBMappingT>(m_resolution);
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
   m_priv_nh.param<double>("prob_miss", m_config.prob_miss, 0.4);
@@ -59,7 +60,8 @@ RemoteVDBMappingROS::RemoteVDBMappingROS()
   m_update_sub = m_nh.subscribe("vdb_map_update", 1, &RemoteVDBMappingROS::updateCallback, this);
 }
 
-void RemoteVDBMappingROS::updateCallback(const std_msgs::String::ConstPtr& update_msg)
+template <typename VDBMappingT>
+void RemoteVDBMappingROS<VDBMappingT>::updateCallback(const std_msgs::String::ConstPtr& update_msg)
 {
   std::istringstream iss(update_msg->data);
   openvdb::io::Stream strm(iss);
@@ -71,7 +73,8 @@ void RemoteVDBMappingROS::updateCallback(const std_msgs::String::ConstPtr& updat
 }
 
 
-void RemoteVDBMappingROS::publishMap() const
+template <typename VDBMappingT>
+void RemoteVDBMappingROS<VDBMappingT>::publishMap() const
 {
   if (!(m_publish_pointcloud || m_publish_vis_marker))
   {
@@ -88,7 +91,7 @@ void RemoteVDBMappingROS::publishMap() const
   visualization_msgs::Marker visualization_marker_msg;
   sensor_msgs::PointCloud2 pointcloud_msg;
 
-  VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
+  VDBMappingTools<VDBMappingT>::createVisualizationMsgs(m_vdb_map->getMap(),
                                            m_map_frame,
                                            visualization_marker_msg,
                                            pointcloud_msg,

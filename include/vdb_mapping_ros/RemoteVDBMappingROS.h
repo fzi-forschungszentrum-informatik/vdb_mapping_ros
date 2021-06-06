@@ -29,7 +29,6 @@
 #define VDBMAPPING_REMOTE_VDBMAPPING_INCLUDED_H_
 
 #include <ros/ros.h>
-#include <vdb_mapping/OccupancyVDBMapping.h>
 #include <vdb_mapping_ros/VDBMappingTools.h>
 #include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
@@ -39,6 +38,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
+template <typename VDBMappingT>
 class RemoteVDBMappingROS
 {
 public:
@@ -65,7 +65,7 @@ private:
   ros::NodeHandle m_priv_nh;
   ros::Subscriber m_update_sub;
 
-  std::unique_ptr<vdb_mapping::OccupancyVDBMapping> m_vdb_map;
+  std::unique_ptr<VDBMappingT> m_vdb_map;
   vdb_mapping::Config m_config;
   double m_resolution;
   bool m_publish_vis_marker;
@@ -76,5 +76,7 @@ private:
   ros::Publisher m_visualization_marker_pub;
 
 };
+
+#include "RemoteVDBMappingROS.hpp"
 
 #endif /* VDBMAPPING_REMOTE_VDBMAPPING_INCLUDED_H_ */

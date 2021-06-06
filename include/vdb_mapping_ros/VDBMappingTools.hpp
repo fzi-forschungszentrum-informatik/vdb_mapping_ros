@@ -26,15 +26,17 @@
 //----------------------------------------------------------------------
 #include <vdb_mapping_ros/VDBMappingTools.h>
 
-void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid,
-                                              const std::string frame_id,
-                                              visualization_msgs::Marker& marker_msg,
-                                              sensor_msgs::PointCloud2& cloud_msg,
-                                              const bool create_marker,
-                                              const bool create_pointcloud)
+template <typename VDBMappingT>
+void VDBMappingTools<VDBMappingT>::createVisualizationMsgs(
+  const typename VDBMappingT::GridT::Ptr grid,
+  const std::string frame_id,
+  visualization_msgs::Marker& marker_msg,
+  sensor_msgs::PointCloud2& cloud_msg,
+  const bool create_marker,
+  const bool create_pointcloud)
 {
-  vdb_mapping::OccupancyVDBMapping::PointCloudT::Ptr cloud(
-    new vdb_mapping::OccupancyVDBMapping::PointCloudT);
+  typename VDBMappingT::PointCloudT::Ptr cloud(
+    new typename VDBMappingT::PointCloudT);
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
   double min_z, max_z;
@@ -44,8 +46,7 @@ void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
 
-
-  for (vdb_mapping::OccupancyVDBMapping::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter;
+  for (typename VDBMappingT::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter;
        ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
@@ -63,7 +64,7 @@ void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid
     }
     if (create_pointcloud)
     {
-      cloud->points.push_back(vdb_mapping::OccupancyVDBMapping::PointT(
+      cloud->points.push_back(typename VDBMappingT::PointT(
         world_coord.x(), world_coord.y(), world_coord.z()));
     }
   }
@@ -102,7 +103,8 @@ void VDBMappingTools::createVisualizationMsgs(const openvdb::FloatGrid::Ptr grid
 }
 
 // Conversion from Hue to RGB Value
-std_msgs::ColorRGBA VDBMappingTools::heightColorCoding(const double height)
+template <typename VDBMappingT>
+std_msgs::ColorRGBA VDBMappingTools<VDBMappingT>::heightColorCoding(const double height)
 {
   // The factor of 0.8 is only for a nicer color range
   double h = height * 0.8;

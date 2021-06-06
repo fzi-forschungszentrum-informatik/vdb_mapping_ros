@@ -199,7 +199,7 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   visualization_msgs::Marker visualization_marker_msg;
   sensor_msgs::PointCloud2 cloud_msg;
 
-  VDBMappingTools::createVisualizationMsgs(m_vdb_map->getMap(),
+  VDBMappingTools<VDBMappingT>::createVisualizationMsgs(m_vdb_map->getMap(),
                                            m_map_frame,
                                            visualization_marker_msg,
                                            cloud_msg,
