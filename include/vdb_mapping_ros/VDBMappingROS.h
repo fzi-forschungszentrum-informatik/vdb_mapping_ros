@@ -99,7 +99,7 @@ public:
    *
    * \param update Update grid
    */
-  void publishUpdate(openvdb::FloatGrid::Ptr update) const;
+  void publishUpdate(const openvdb::FloatGrid::Ptr update) const;
 
 private:
   /*!
@@ -132,7 +132,10 @@ private:
    */
   ros::Publisher m_pointcloud_pub;
 
-  ros::Publisher m_update_pub;
+  /*!
+   * \brief Publisher map updates
+   */ 
+  ros::Publisher m_map_update_pub;
 
   /*!
    * \brief Transformation buffer
@@ -167,6 +170,7 @@ private:
   /*!
    * \brief Map configuration
    */
+  vdb_mapping::Config m_config;
 
   /*!
    * \brief Specifies whether a pointcloud should be published or not
@@ -180,7 +184,6 @@ private:
 
   bool m_publish_updates;
 
-  vdb_mapping::Config m_config;
 };
 
 #include "VDBMappingROS.hpp"

@@ -67,6 +67,7 @@ void RemoteVDBMappingROS<VDBMappingT>::updateCallback(const std_msgs::String::Co
   openvdb::io::Stream strm(iss);
   openvdb::GridPtrVecPtr grids;
   grids                               = strm.getGrids();
+  // This cast might fail if different VDB versions are used.
   openvdb::FloatGrid::Ptr update_grid = openvdb::gridPtrCast<openvdb::FloatGrid>(grids->front());
   m_vdb_map->updateMap(update_grid);
   publishMap();

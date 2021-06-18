@@ -29,7 +29,7 @@
 template <typename VDBMappingT>
 void VDBMappingTools<VDBMappingT>::createVisualizationMsgs(
   const typename VDBMappingT::GridT::Ptr grid,
-  const std::string frame_id,
+  const std::string& frame_id,
   visualization_msgs::Marker& marker_msg,
   sensor_msgs::PointCloud2& cloud_msg,
   const bool create_marker,

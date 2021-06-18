@@ -48,7 +48,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_priv_nh.param<bool>("publish_pointcloud", m_publish_pointcloud, true);
   m_priv_nh.param<bool>("publish_vis_marker", m_publish_vis_marker, true);
-  m_priv_nh.param<bool>("publish_updates", m_publish_updates, true);
+  m_priv_nh.param<bool>("publish_updates", m_publish_updates, false);
 
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame.empty())
@@ -72,10 +72,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
 
   m_visualization_marker_pub =
-    m_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
-  m_pointcloud_pub = m_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
-
-  m_update_pub = m_nh.advertise<std_msgs::String>("vdb_map_update", 1, true);
+    m_priv_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
+  m_pointcloud_pub = m_priv_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
 }
 
 template <typename VDBMappingT>
@@ -170,7 +168,7 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
 }
 
 template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::publishUpdate(openvdb::FloatGrid::Ptr update) const
+void VDBMappingROS<VDBMappingT>::publishUpdate(const openvdb::FloatGrid::Ptr update) const
 {
   openvdb::GridPtrVec grids;
   grids.push_back(update);
@@ -178,7 +176,7 @@ void VDBMappingROS<VDBMappingT>::publishUpdate(openvdb::FloatGrid::Ptr update) c
   openvdb::io::Stream(oss).write(grids);
   std_msgs::String msg;
   msg.data = oss.str();
-  m_update_pub.publish(msg);
+  m_map_update_pub.publish(msg);
 }
 
 template <typename VDBMappingT>

@@ -55,8 +55,8 @@ public:
    * \param create_marker Flag specifying to create a marker message
    * \param create_pointcloud Flag specifying to create a pointcloud message
    */
-  static void createVisualizationMsgs(typename VDBMappingT::GridT::Ptr grid,
-                                      const std::string frame_id,
+  static void createVisualizationMsgs(const typename VDBMappingT::GridT::Ptr grid,
+                                      const std::string& frame_id,
                                       visualization_msgs::Marker& marker_msg,
                                       sensor_msgs::PointCloud2& cloud_msg,
                                       bool create_marker,
