@@ -101,6 +101,8 @@ public:
    */
   void publishUpdate(const openvdb::FloatGrid::Ptr update) const;
 
+  void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+
 private:
   /*!
    * \brief Public node handle
@@ -121,6 +123,12 @@ private:
    * \brief Subscriber for scan aligned pointclouds
    */
   ros::Subscriber m_aligned_cloud_sub;
+
+
+  /*!
+   * \brief Subscriber for map updates
+   */
+  ros::Subscriber m_map_update_sub;
 
   /*!
    * \brief Publisher for the marker array
@@ -184,6 +192,7 @@ private:
 
   bool m_publish_updates;
 
+  bool m_remote_mode;
 };
 
 #include "VDBMappingROS.hpp"

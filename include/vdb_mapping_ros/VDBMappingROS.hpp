@@ -34,6 +34,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   : m_priv_nh("~")
   , m_tf_listener(m_tf_buffer)
 {
+  openvdb::initialize();
+
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
   m_vdb_map = std::make_unique<VDBMappingT>(m_resolution);
 
@@ -50,6 +52,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<bool>("publish_vis_marker", m_publish_vis_marker, true);
   m_priv_nh.param<bool>("publish_updates", m_publish_updates, false);
 
+  m_priv_nh.param<bool>("remote_mode", m_remote_mode, false);
+
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame.empty())
   {
@@ -65,11 +69,18 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<std::string>("raw_points", raw_points_topic, "");
   m_priv_nh.param<std::string>("aligned_points", aligned_points_topic, "");
 
-  m_sensor_cloud_sub =
-    m_nh.subscribe(raw_points_topic, 1, &VDBMappingROS::sensorCloudCallback, this);
-
-  m_aligned_cloud_sub =
-    m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
+  if (!m_remote_mode)
+  {
+    m_sensor_cloud_sub =
+      m_nh.subscribe(raw_points_topic, 1, &VDBMappingROS::sensorCloudCallback, this);
+    m_aligned_cloud_sub =
+      m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
+    m_map_update_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_update", 1, true);
+  }
+  else
+  {
+    m_map_update_sub = m_nh.subscribe("vdb_map_update", 1, &VDBMappingROS::mapUpdateCallback, this);
+  }
 
   m_visualization_marker_pub =
     m_priv_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
@@ -177,6 +188,20 @@ void VDBMappingROS<VDBMappingT>::publishUpdate(const openvdb::FloatGrid::Ptr upd
   std_msgs::String msg;
   msg.data = oss.str();
   m_map_update_pub.publish(msg);
+}
+
+
+template <typename VDBMappingT>
+void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg)
+{
+  std::istringstream iss(update_msg->data);
+  openvdb::io::Stream strm(iss);
+  openvdb::GridPtrVecPtr grids;
+  grids                               = strm.getGrids();
+  // This cast might fail if different VDB versions are used.
+  openvdb::FloatGrid::Ptr update_grid = openvdb::gridPtrCast<openvdb::FloatGrid>(grids->front());
+  m_vdb_map->updateMap(update_grid);
+  publishMap();
 }
 
 template <typename VDBMappingT>
