@@ -197,7 +197,7 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::Const
   std::istringstream iss(update_msg->data);
   openvdb::io::Stream strm(iss);
   openvdb::GridPtrVecPtr grids;
-  grids                               = strm.getGrids();
+  grids = strm.getGrids();
   // This cast might fail if different VDB versions are used.
   openvdb::FloatGrid::Ptr update_grid = openvdb::gridPtrCast<openvdb::FloatGrid>(grids->front());
   m_vdb_map->updateMap(update_grid);

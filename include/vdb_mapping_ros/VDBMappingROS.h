@@ -142,7 +142,7 @@ private:
 
   /*!
    * \brief Publisher map updates
-   */ 
+   */
   ros::Publisher m_map_update_pub;
 
   /*!
@@ -190,8 +190,14 @@ private:
    */
   bool m_publish_vis_marker;
 
+  /*!
+   * \brief Specifies whether the mapping publishes map updates for remote use
+   */
   bool m_publish_updates;
 
+  /*!
+   * \brief Specifies if the node runs in normal or remote mapping mode
+   */
   bool m_remote_mode;
 };
 
