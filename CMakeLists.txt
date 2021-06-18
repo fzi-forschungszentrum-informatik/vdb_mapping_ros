@@ -47,7 +47,6 @@ include_directories(
 
 ## Declare a C++ library
 #add_library(${PROJECT_NAME}
-  #src/RemoteVDBMappingROS.cpp
   #src/VDBMappingTools.cpp
 #)
 
@@ -74,20 +73,6 @@ target_link_libraries(${PROJECT_NAME}_node
   vdb_mapping::vdb_mapping
   ${catkin_LIBRARIES}
 )
-
-add_executable(remote_vdb_mapping_ros_node src/remote_vdb_mapping_ros_node.cpp)
-
-add_dependencies(remote_vdb_mapping_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-target_include_directories(remote_vdb_mapping_ros_node PUBLIC
-  ${catkin_INCLUDE_DIRS}
-)
-
-target_link_libraries(remote_vdb_mapping_ros_node
-  vdb_mapping::vdb_mapping
-  ${catkin_LIBRARIES}
-)
-
 
 #############
 ## Install ##
