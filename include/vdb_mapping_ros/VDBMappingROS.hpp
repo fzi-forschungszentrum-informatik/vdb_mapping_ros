@@ -94,6 +94,12 @@ void VDBMappingROS<VDBMappingT>::resetMap()
 }
 
 template <typename VDBMappingT>
+const typename VDBMappingT::GridT::Ptr VDBMappingROS<VDBMappingT>::getMap()
+{
+  return m_vdb_map->getMap();
+}
+
+template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::alignedCloudCallback(
   const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
