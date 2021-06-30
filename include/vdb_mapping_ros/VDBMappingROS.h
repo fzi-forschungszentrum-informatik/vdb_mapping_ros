@@ -101,7 +101,19 @@ public:
    */
   void publishUpdate(const openvdb::FloatGrid::Ptr update) const;
 
+  /*!
+   * \brief Listens to map updates and creats a map from these
+   *
+   * \param update_msg Single map update from a remote mapping instance
+   */
   void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+
+  /*!
+   * \brief Returns a pointer to the map
+   *
+   * \returns VDB grid pointer
+   */
+  const typename VDBMappingT::GridT::Ptr getMap();
 
 private:
   /*!
