@@ -45,7 +45,7 @@ public:
   virtual ~VDBMappingTools(){};
 
   /*!
-   * \brief Creates visualization msgs for pointcloud and marker arrays
+   * \brief Creates output msgs for pointcloud and marker arrays
    *
    * \param grid Map grid
    * \param resolution Resolution of the grid
@@ -55,12 +55,12 @@ public:
    * \param create_marker Flag specifying to create a marker message
    * \param create_pointcloud Flag specifying to create a pointcloud message
    */
-  static void createVisualizationMsgs(const typename VDBMappingT::GridT::Ptr grid,
-                                      const std::string& frame_id,
-                                      visualization_msgs::Marker& marker_msg,
-                                      sensor_msgs::PointCloud2& cloud_msg,
-                                      bool create_marker,
-                                      bool create_pointcloud);
+  static void createMappingOutput(const typename VDBMappingT::GridT::Ptr grid,
+                                  const std::string& frame_id,
+                                  visualization_msgs::Marker& marker_msg,
+                                  sensor_msgs::PointCloud2& cloud_msg,
+                                  bool create_marker,
+                                  bool create_pointcloud);
 
   /*!
    * \brief Calculates a height correlating color coding using HSV color space

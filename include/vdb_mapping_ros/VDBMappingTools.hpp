@@ -27,13 +27,12 @@
 #include <vdb_mapping_ros/VDBMappingTools.h>
 
 template <typename VDBMappingT>
-void VDBMappingTools<VDBMappingT>::createVisualizationMsgs(
-  const typename VDBMappingT::GridT::Ptr grid,
-  const std::string& frame_id,
-  visualization_msgs::Marker& marker_msg,
-  sensor_msgs::PointCloud2& cloud_msg,
-  const bool create_marker,
-  const bool create_pointcloud)
+void VDBMappingTools<VDBMappingT>::createMappingOutput(const typename VDBMappingT::GridT::Ptr grid,
+                                                       const std::string& frame_id,
+                                                       visualization_msgs::Marker& marker_msg,
+                                                       sensor_msgs::PointCloud2& cloud_msg,
+                                                       const bool create_marker,
+                                                       const bool create_pointcloud)
 {
   typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
 
