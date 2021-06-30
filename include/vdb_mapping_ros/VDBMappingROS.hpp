@@ -34,8 +34,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   : m_priv_nh("~")
   , m_tf_listener(m_tf_buffer)
 {
-  openvdb::initialize();
-
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
   m_vdb_map = std::make_unique<VDBMappingT>(m_resolution);
 
