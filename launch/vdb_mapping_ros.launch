@@ -11,7 +11,7 @@
   <arg name="prob_thres_max"      default="0.8"/>
   <arg name="publish_pointcloud"  default="true"/>
   <arg name="publish_vis_marker"  default="true"/>
-
+  <arg name="publish_updates"     default="false"/>
 
   <node pkg="vdb_mapping_ros" type="vdb_mapping_ros_node" name="vdb_mapping" output="screen">
     <param name="aligned_points"      type="string" value="$(arg aligned_points)"/>
@@ -26,6 +26,7 @@
     <param name="prob_thres_max"      type="double" value="$(arg prob_thres_max)"/>
     <param name="publish_pointcloud"  type="boolean" value="$(arg publish_pointcloud)"/>
     <param name="publish_vis_marker"  type="boolean" value="$(arg publish_vis_marker)"/>
-
+    <param name="publish_updates"     type="boolean" value="$(arg publish_updates)"/>
+    <param name="remote_mode"         type="boolean" value="false"/>
   </node>
 </launch>

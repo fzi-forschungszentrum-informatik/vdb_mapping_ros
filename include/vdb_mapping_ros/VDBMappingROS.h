@@ -30,7 +30,11 @@
 #define VDB_MAPPING_ROS_VDBMAPPINGROS_H_INCLUDED
 
 #include <ros/ros.h>
+#include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
+
+#include <openvdb/io/Stream.h>
+#include <vdb_mapping_ros/VDBMappingTools.h>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
@@ -91,15 +95,13 @@ public:
   void publishMap() const;
 
   /*!
-   * \brief Calculates a height correlating color coding using HSV color space
+   * \brief Publishes a grid update as compressed serialized string
    *
-   * \param height Gridcell height relativ to the min and max height of the complete grid. Parameter
-   * can take values between 0 and 1
-   *
-   * \returns RGBA color of the grid cell
+   * \param update Update grid
    */
-  std_msgs::ColorRGBA heightColorCoding(const double height) const;
+  void publishUpdate(const openvdb::FloatGrid::Ptr update) const;
 
+  void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
 
 private:
   /*!
@@ -122,6 +124,12 @@ private:
    */
   ros::Subscriber m_aligned_cloud_sub;
 
+
+  /*!
+   * \brief Subscriber for map updates
+   */
+  ros::Subscriber m_map_update_sub;
+
   /*!
    * \brief Publisher for the marker array
    */
@@ -131,6 +139,11 @@ private:
    * \brief Publisher for the point cloud
    */
   ros::Publisher m_pointcloud_pub;
+
+  /*!
+   * \brief Publisher map updates
+   */
+  ros::Publisher m_map_update_pub;
 
   /*!
    * \brief Transformation buffer
@@ -165,6 +178,7 @@ private:
   /*!
    * \brief Map configuration
    */
+  vdb_mapping::Config m_config;
 
   /*!
    * \brief Specifies whether a pointcloud should be published or not
@@ -175,7 +189,16 @@ private:
    * \brief Specifies whether the map should be published as markers or not
    */
   bool m_publish_vis_marker;
-  vdb_mapping::Config m_config;
+
+  /*!
+   * \brief Specifies whether the mapping publishes map updates for remote use
+   */
+  bool m_publish_updates;
+
+  /*!
+   * \brief Specifies if the node runs in normal or remote mapping mode
+   */
+  bool m_remote_mode;
 };
 
 #include "VDBMappingROS.hpp"
