@@ -24,6 +24,9 @@
   <depend>tf2_sensor_msgs</depend>
   <depend>vdb_mapping</depend>
 
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
   <export>
 
   </export>

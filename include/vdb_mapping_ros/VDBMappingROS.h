@@ -44,6 +44,8 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
+#include <vdb_mapping_ros/MapReset.h>
+
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
@@ -115,6 +117,14 @@ public:
    */
   const typename VDBMappingT::GridT::Ptr getMap();
 
+  /*!
+   * \brief Callback for map reset service call
+   *
+   * \returns result of map reset
+   */
+  bool mapResetCallback(vdb_mapping_ros::MapReset::Request&,
+                        vdb_mapping_ros::MapReset::Response& res);
+
 private:
   /*!
    * \brief Public node handle
@@ -156,6 +166,11 @@ private:
    * \brief Publisher map updates
    */
   ros::Publisher m_map_update_pub;
+
+  /*!
+   * \brief Service for reset map
+   */
+  ros::ServiceServer m_map_reset_server;
 
   /*!
    * \brief Transformation buffer

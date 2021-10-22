@@ -14,12 +14,24 @@ endif()
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   pcl_conversions
   roscpp
   tf2_ros
   tf2_sensor_msgs
 )
 find_package(vdb_mapping REQUIRED)
+
+# Declare the service files to be built
+add_service_files(FILES
+  MapReset.srv
+)
+
+# Actually generate the language-specific message and service files
+generate_messages(
+  DEPENDENCIES 
+  std_msgs 
+)
 
 catkin_package(
   INCLUDE_DIRS
@@ -31,6 +43,7 @@ catkin_package(
     roscpp
     tf2_ros
     tf2_sensor_msgs
+    message_runtime
 )
 
 
