@@ -66,9 +66,15 @@ public:
   void resetMap();
 
   /*!
-   * \brief Resets the current map
+   * \brief Saves the current map
    */
   bool saveMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
+
+
+  /*!
+   * \brief Load stored map
+   */
+  bool loadMap(std::string map_path_name);
 
   /*!
    * \brief Sensor callback for scan aligned Pointclouds
