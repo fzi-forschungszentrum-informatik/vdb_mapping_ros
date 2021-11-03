@@ -86,6 +86,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_map_reset_service =
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
+
+  m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
 }
 
 template <typename VDBMappingT>
@@ -104,6 +106,16 @@ void VDBMappingROS<VDBMappingT>::resetMap()
   ROS_INFO_STREAM("Reseting Map");
   m_vdb_map->resetMap();
   publishMap();
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::saveMap(std_srvs::Trigger::Request& req,
+                                         std_srvs::Trigger::Response& res)
+{
+  (void)req;
+  ROS_INFO_STREAM("Saving Map");
+  res.success = m_vdb_map->saveMap();
+  return res.success;
 }
 
 template <typename VDBMappingT>

@@ -31,6 +31,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <std_srvs/Trigger.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -63,6 +64,11 @@ public:
    * \brief Resets the current map
    */
   void resetMap();
+
+  /*!
+   * \brief Resets the current map
+   */
+  bool saveMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 
   /*!
    * \brief Sensor callback for scan aligned Pointclouds
@@ -165,6 +171,13 @@ private:
    * \brief Publisher map updates
    */
   ros::Publisher m_map_update_pub;
+
+
+  /*!
+   * \brief Saves map in specified path from parameter server
+   */
+  ros::ServiceServer m_save_map_service_server;
+
 
   /*!
    * \brief Service for reset map
