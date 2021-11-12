@@ -12,7 +12,6 @@
   <arg name="publish_pointcloud"  default="true"/>
   <arg name="publish_vis_marker"  default="true"/>
   <arg name="publish_updates"     default="false"/>
-  <arg name="load_map_path"     default="map2021-11-03_19:18:08.vdb"/>
 
   <node pkg="vdb_mapping_ros" type="esa_vdb_mapping_ros_node" name="vdb_mapping" output="screen">
     <param name="aligned_points"      type="string" value="$(arg aligned_points)"/>
@@ -29,6 +28,5 @@
     <param name="publish_vis_marker"  type="boolean" value="$(arg publish_vis_marker)"/>
     <param name="publish_updates"     type="boolean" value="$(arg publish_updates)"/>
     <param name="remote_mode"         type="boolean" value="false"/>
-    <param name="load_map_path"       type="string"  value="$(arg load_map_path)"/>
   </node>
 </launch>

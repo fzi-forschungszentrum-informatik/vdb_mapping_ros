@@ -52,14 +52,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_priv_nh.param<bool>("remote_mode", m_remote_mode, false);
 
-  std::string map_path_name;
-  m_priv_nh.param<std::string>("load_map_path", map_path_name, "");
-  std::cout << map_path_name << std::endl;
-  if (!map_path_name.empty())
-  {
-    loadMap(map_path_name);
-  }
-
   m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
   if (m_sensor_frame.empty())
   {
@@ -96,6 +88,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
 
   m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
+  m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
 }
 
 template <typename VDBMappingT>
@@ -127,10 +120,13 @@ bool VDBMappingROS<VDBMappingT>::saveMap(std_srvs::Trigger::Request& req,
 }
 
 template <typename VDBMappingT>
-bool VDBMappingROS<VDBMappingT>::loadMap(std::string file_path)
+bool VDBMappingROS<VDBMappingT>::loadMap(vdb_mapping_msgs::LoadMap::Request& req,
+                                         vdb_mapping_msgs::LoadMap::Response& res)
 {
   ROS_INFO_STREAM("Loading Map");
-  bool success = m_vdb_map->loadMap(file_path);
+  bool success = m_vdb_map->loadMap(req.path);
+  publishMap();
+  res.success = success;
   return success;
 }
 

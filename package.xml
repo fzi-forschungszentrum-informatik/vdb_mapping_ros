@@ -23,6 +23,7 @@
   <depend>tf2_ros</depend>
   <depend>tf2_sensor_msgs</depend>
   <depend>vdb_mapping</depend>
+  <depend>vdb_mapping_msgs</depend>
 
   <export>
 

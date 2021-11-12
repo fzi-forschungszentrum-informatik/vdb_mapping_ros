@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   tf2_ros
   tf2_sensor_msgs
+  vdb_mapping_msgs
 )
 find_package(vdb_mapping REQUIRED)
 
@@ -31,6 +32,7 @@ catkin_package(
     roscpp
     tf2_ros
     tf2_sensor_msgs
+    vdb_mapping_msgs
 )
 
 

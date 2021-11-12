@@ -32,6 +32,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
+#include <vdb_mapping_msgs/LoadMap.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -74,7 +75,7 @@ public:
   /*!
    * \brief Load stored map
    */
-  bool loadMap(std::string map_path_name);
+  bool loadMap(vdb_mapping_msgs::LoadMap::Request& req, vdb_mapping_msgs::LoadMap::Response& res);
 
   /*!
    * \brief Sensor callback for scan aligned Pointclouds
@@ -183,6 +184,11 @@ private:
    * \brief Saves map in specified path from parameter server
    */
   ros::ServiceServer m_save_map_service_server;
+
+  /*!
+   * \brief Loads a map from specified path from service
+   */
+  ros::ServiceServer m_load_map_service_server;
 
 
   /*!
