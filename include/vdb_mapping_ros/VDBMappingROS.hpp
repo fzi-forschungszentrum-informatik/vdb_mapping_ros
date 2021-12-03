@@ -29,9 +29,6 @@
 #include <iostream>
 #include <vdb_mapping_ros/VDBMappingROS.h>
 
-#include <std_msgs/Bool.h>
-
-
 template <typename VDBMappingT>
 VDBMappingROS<VDBMappingT>::VDBMappingROS()
   : m_priv_nh("~")
@@ -87,17 +84,17 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     m_priv_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
   m_pointcloud_pub = m_priv_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
 
-  m_map_reset_server =
+  m_map_reset_service =
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
 }
 
 template <typename VDBMappingT>
-bool VDBMappingROS<VDBMappingT>::mapResetCallback(vdb_mapping_ros::MapReset::Request&,
-                                                  vdb_mapping_ros::MapReset::Response& res)
+bool VDBMappingROS<VDBMappingT>::mapResetCallback(std_srvs::TriggerRequest&,
+                                                  std_srvs::TriggerResponse& res)
 {
   resetMap();
-  res.result      = std_msgs::Bool();
-  res.result.data = true;
+  res.success = true;
+  res.message = "Reset map successful.";
   return true;
 }
 

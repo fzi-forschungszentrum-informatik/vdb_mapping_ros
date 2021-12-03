@@ -44,7 +44,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
-#include <vdb_mapping_ros/MapReset.h>
+#include <std_srvs/Trigger.h>
 
 /*!
  * \brief ROS wrapper class for vdb_mapping
@@ -122,8 +122,7 @@ public:
    *
    * \returns result of map reset
    */
-  bool mapResetCallback(vdb_mapping_ros::MapReset::Request&,
-                        vdb_mapping_ros::MapReset::Response& res);
+  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
 
 private:
   /*!
@@ -170,7 +169,7 @@ private:
   /*!
    * \brief Service for reset map
    */
-  ros::ServiceServer m_map_reset_server;
+  ros::ServiceServer m_map_reset_service;
 
   /*!
    * \brief Transformation buffer
