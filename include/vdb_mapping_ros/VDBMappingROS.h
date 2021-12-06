@@ -44,6 +44,8 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
+#include <std_srvs/Trigger.h>
+
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
@@ -115,6 +117,13 @@ public:
    */
   const typename VDBMappingT::GridT::Ptr getMap();
 
+  /*!
+   * \brief Callback for map reset service call
+   *
+   * \returns result of map reset
+   */
+  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
+
 private:
   /*!
    * \brief Public node handle
@@ -156,6 +165,11 @@ private:
    * \brief Publisher map updates
    */
   ros::Publisher m_map_update_pub;
+
+  /*!
+   * \brief Service for reset map
+   */
+  ros::ServiceServer m_map_reset_service;
 
   /*!
    * \brief Transformation buffer
