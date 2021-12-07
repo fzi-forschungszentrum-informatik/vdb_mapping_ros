@@ -24,6 +24,7 @@
   <depend>tf2_eigen</depend>
   <depend>tf2_ros</depend>
   <depend>tf2_sensor_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
   <depend>vdb_mapping</depend>
   <depend>vdb_mapping_msgs</depend>
   <depend>visualization_msgs</depend>
