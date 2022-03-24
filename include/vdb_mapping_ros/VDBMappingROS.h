@@ -101,7 +101,7 @@ public:
    *
    * \param update Update grid
    */
-  void publishUpdate(const openvdb::FloatGrid::Ptr update) const;
+  void publishUpdate(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
    * \brief Listens to map updates and creats a map from these
