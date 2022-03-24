@@ -42,6 +42,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<double>("prob_miss", m_config.prob_miss, 0.4);
   m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
+  m_priv_nh.param<std::string>("map_save_dir", m_config.path, "");
 
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
@@ -86,6 +87,9 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_map_reset_service =
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
+
+  m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
+  m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
 }
 
 template <typename VDBMappingT>
@@ -104,6 +108,27 @@ void VDBMappingROS<VDBMappingT>::resetMap()
   ROS_INFO_STREAM("Reseting Map");
   m_vdb_map->resetMap();
   publishMap();
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::saveMap(std_srvs::Trigger::Request& req,
+                                         std_srvs::Trigger::Response& res)
+{
+  (void)req;
+  ROS_INFO_STREAM("Saving Map");
+  res.success = m_vdb_map->saveMap();
+  return res.success;
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::loadMap(vdb_mapping_msgs::LoadMap::Request& req,
+                                         vdb_mapping_msgs::LoadMap::Response& res)
+{
+  ROS_INFO_STREAM("Loading Map");
+  bool success = m_vdb_map->loadMap(req.path);
+  publishMap();
+  res.success = success;
+  return success;
 }
 
 template <typename VDBMappingT>
