@@ -42,7 +42,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<double>("prob_miss", m_config.prob_miss, 0.4);
   m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
-  m_priv_nh.param<std::string>("map_save_dir", m_config.path, "");
+  m_priv_nh.param<std::string>("map_save_dir", m_config.map_directory_path, "");
 
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
