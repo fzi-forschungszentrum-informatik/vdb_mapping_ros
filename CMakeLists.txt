@@ -15,10 +15,13 @@ endif()
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
+  pcl_ros
   roscpp
+  tf2_eigen
   tf2_ros
   tf2_sensor_msgs
   vdb_mapping_msgs
+  visualization_msgs
 )
 find_package(vdb_mapping REQUIRED)
 
@@ -29,10 +32,13 @@ catkin_package(
     vdb_mapping_ros
   CATKIN_DEPENDS
     pcl_conversions
+    pcl_ros
     roscpp
+    tf2_eigen
     tf2_ros
     tf2_sensor_msgs
     vdb_mapping_msgs
+    visualization_msgs
 )
 
 
