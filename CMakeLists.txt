@@ -28,8 +28,6 @@ find_package(vdb_mapping REQUIRED)
 catkin_package(
   INCLUDE_DIRS
     include
-  LIBRARIES
-    vdb_mapping_ros
   CATKIN_DEPENDS
     pcl_conversions
     pcl_ros
