@@ -1,0 +1,5 @@
+repositories:
+  vdb_mapping:
+    type: git
+    url: https://ids-git.fzi.de/fla/vdb_mapping.git
+    version: vdb_mapping_branch

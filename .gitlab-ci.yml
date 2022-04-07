@@ -1,4 +1,130 @@
+variables:
+  GIT_STRATEGY: clone
+  ROSDISTRO_INDEX_URL: http://ids-ubuntu-testing.fzi.de:8000/rosdistro/index-v4.yaml
+  CI_SCRIPTS_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@ids-git.fzi.de/continuous_integration/ci_scripts
+  CATKIN_ROOT: ${HOME}/catkin_workspace
+  UPSTREAM_WORKSPACE: ".upstream_workspace.yaml"
+  ROSDEP_SKIP_KEYS: "vdb_mapping"
+  VDB_MAPPING_BRANCH: "${CI_COMMIT_REF_NAME}"
+
+before_script:
+  - sed -i 's/https\:\/\/ids-git\.fzi\.de/https\:\/\/gitlab-ci-token\:'${CI_JOB_TOKEN}'\@ids-git\.fzi\.de/g' ${CI_PROJECT_DIR}/${UPSTREAM_WORKSPACE}
+  - echo "Pipeline source is ${CI_PIPELINE_SOURCE}"
+  - echo "Using vdb_mapping branch '${VDB_MAPPING_BRANCH}'"
+  - sed -i 's/vdb_mapping_branch/'${VDB_MAPPING_BRANCH}'/g' ${CI_PROJECT_DIR}/${UPSTREAM_WORKSPACE}
+  - if [[ ${VDB_MAPPING_BRANCH} == ${CI_DEFAULT_BRANCH} ]]; then DEB_BUILD="true"; fi
+
 include:
   - project: 'continuous_integration/ci_scripts'
     ref: master
-    file: '/gitlab-ci-yml/fla_pipeline.yml'
+    file: '/gitlab-ci-yml/include/cpp_check.yml'
+  - project: 'continuous_integration/ci_scripts'
+    ref: master
+    file: '/gitlab-ci-yml/include/industrial_ci.yml'
+  - project: 'continuous_integration/ci_scripts'
+    ref: master
+    file: '/gitlab-ci-yml/include/ros_deb_upload.yml'
+stages:
+  - check
+  - build
+  - upload
+
+.create_deb_package:
+  tags:
+    - docker
+  stage: build
+  script:
+    - apt-get -y update
+    - source /opt/ros/${ROS_DISTRIBUTION}/setup.bash
+    - if [[ -z ${CI_SCRIPTS_BRANCH} ]]; then git clone ${CI_SCRIPTS_REPO} ${HOME}/ci_scripts; fi
+    - if [[ -n ${CI_SCRIPTS_BRANCH} ]]; then git clone ${CI_SCRIPTS_REPO} ${HOME}/ci_scripts -b ${CI_SCRIPTS_BRANCH}; fi
+    - cp ${HOME}/ci_scripts/catkin_build_scripts/10-fzi-sources.list /etc/ros/rosdep/sources.list.d/
+    - rosdep update
+    - rosdep install --from-path ${CI_PROJECT_DIR} -y --ignore-src
+    - mkdir -p deb_packages
+    - ${HOME}/ci_scripts/catkin_build_scripts/build_pkg.sh ${CI_PROJECT_DIR} ${CI_PROJECT_DIR}/deb_packages
+  artifacts:
+    paths:
+      - deb_packages/
+
+.catkin_lint:
+  tags:
+    - docker
+  stage: check
+  script:
+    - apt-get -y update
+    - source /opt/ros/${ROS_DISTRIBUTION}/setup.bash
+    - if [[ -z ${CI_SCRIPTS_BRANCH} ]]; then git clone ${CI_SCRIPTS_REPO} ${HOME}/ci_scripts; fi
+    - if [[ -n ${CI_SCRIPTS_BRANCH} ]]; then git clone ${CI_SCRIPTS_REPO} ${HOME}/ci_scripts -b ${CI_SCRIPTS_BRANCH}; fi
+    - cp ${HOME}/ci_scripts/catkin_build_scripts/10-fzi-sources.list /etc/ros/rosdep/sources.list.d/
+    - ${HOME}/ci_scripts/catkin_build_scripts/prepare_workspace.sh ${CI_PROJECT_DIR} ${CI_PROJECT_NAME} ${CATKIN_ROOT} ${ROSDISTRO_INDEX_URL}
+    - mkdir -p lint_results
+    - cd ${CATKIN_ROOT}/src
+    - pip install --user -U catkin_lint
+    - export PATH=${HOME}/.local/bin:${PATH}
+    - catkin_lint --version
+    - catkin_lint . --strict --explain |& tee ${CI_PROJECT_DIR}/lint_results/catkin_lint_errors_and_warnings.txt
+    - catkin_lint -W2 --explain . |& tee ${CI_PROJECT_DIR}/lint_results/catkin_lint_notices.txt
+  artifacts:
+    when: always
+    paths:
+      - lint_results/
+
+
+catkin_lint_focal:
+  image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_ros
+  variables:
+    ROS_DISTRIBUTION: noetic # This will be overwritten once ROS is sourced
+  extends: .catkin_lint
+  rules:
+    # Hacky workaround to get this run in mr pipelines, as well
+    - if: $CI_PIPELINE_SOURCE == $CI_PIPELINE_SOURCE
+
+industrial_ci_noetic:
+  image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_ros
+  extends: .industrial_ci
+  variables:
+    ROS_DISTRO: "noetic"
+    DO_TEST: "${TEST_NOETIC}"
+  needs:
+    - "catkin_lint_focal"
+  rules:
+    # If event is MR, set upstream branch to MR target branch. Also run in other cases
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        VDB_MAPPING_BRANCH: ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+
+
+create_deb_noetic:
+  image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_ros
+  variables:
+    ROS_DISTRIBUTION: noetic
+    CI_SCRIPTS_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@ids-git.fzi.de/continuous_integration/ci_scripts
+  extends: .create_deb_package
+  rules:
+    # Run in MR if target branch is default branch or on any other event if active branch is default
+    # branch
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+
+upload_debs_noetic:
+  image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_ros
+  variables:
+    ROS_DISTRIBUTION: noetic
+  extends: .upload_debs
+  dependencies:
+    - create_deb_noetic
+    - industrial_ci_noetic
+  needs:
+    - create_deb_noetic
+    - industrial_ci_noetic
+  rules:
+    - if: '$BUILD_NOETIC && $BUILD_NOETIC == "false"'
+      when: never
+    - if: '$DEB_BUILD && $DEB_BUILD == "false"'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME == $UPLOAD_BRANCH_NAME && $CI_APTLY_TOKEN && $CI_APTLY_USERNAME'
+    - if: '$UPLOAD_BRANCH_NAME == null && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_APTLY_TOKEN && $CI_APTLY_USERNAME'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never

@@ -15,10 +15,13 @@ endif()
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
+  pcl_ros
   roscpp
+  tf2_eigen
   tf2_ros
   tf2_sensor_msgs
   vdb_mapping_msgs
+  visualization_msgs
 )
 find_package(vdb_mapping REQUIRED)
 
@@ -29,10 +32,13 @@ catkin_package(
     vdb_mapping_ros
   CATKIN_DEPENDS
     pcl_conversions
+    pcl_ros
     roscpp
+    tf2_eigen
     tf2_ros
     tf2_sensor_msgs
     vdb_mapping_msgs
+    visualization_msgs
 )
 
 
@@ -56,9 +62,6 @@ add_executable(${PROJECT_NAME}_node src/vdb_mapping_ros_node.cpp)
 ## same as for the library above
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-target_include_directories(${PROJECT_NAME}_node PUBLIC
-  ${catkin_INCLUDE_DIRS}
-)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   vdb_mapping::vdb_mapping
