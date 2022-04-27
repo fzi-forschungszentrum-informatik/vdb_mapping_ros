@@ -87,7 +87,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   if (m_apply_remote_overwrites)
   {
     m_map_overwrite_sub =
-      m_nh.subscribe("vdb_map_update", 1, &VDBMappingROS::mapOverwriteCallback, this);
+      m_nh.subscribe("vdb_map_overwrites", 1, &VDBMappingROS::mapOverwriteCallback, this);
   }
 
   m_sensor_cloud_sub =
