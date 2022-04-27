@@ -286,7 +286,7 @@ VDBMappingROS<VDBMappingT>::msgToGrid(const std_msgs::String::ConstPtr& msg) con
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg)
 {
-  if(!m_reduce_data)
+  if (!m_reduce_data)
   {
     m_vdb_map->updateMap(msgToGrid(update_msg));
   }
