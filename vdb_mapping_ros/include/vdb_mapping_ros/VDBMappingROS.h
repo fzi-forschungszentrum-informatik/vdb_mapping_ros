@@ -117,7 +117,16 @@ public:
    *
    * \param update Update grid
    */
-  void publishUpdate(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+  /*!
+   * \brief Creates a compressed Bitstream as ROS msg from an input grid
+   *
+   * \param update Update grid
+   *
+   * \returns update msg
+   */
+  std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+
+  typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
 
   /*!
    * \brief Listens to map updates and creats a map from these
@@ -125,6 +134,13 @@ public:
    * \param update_msg Single map update from a remote mapping instance
    */
   void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+
+  /*!
+   * \brief Listens to map overwrites and creates a map from these
+   *
+   * \param update_msg Single map overwrite from a remote mapping instance
+   */
+  void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
 
   /*!
    * \brief Returns a pointer to the map
@@ -169,11 +185,15 @@ private:
    */
   ros::Subscriber m_aligned_cloud_sub;
 
-
   /*!
    * \brief Subscriber for map updates
    */
   ros::Subscriber m_map_update_sub;
+
+  /*!
+   * \brief Subscriber for map overwrites
+   */
+  ros::Subscriber m_map_overwrite_sub;
 
   /*!
    * \brief Publisher for the marker array
@@ -186,10 +206,14 @@ private:
   ros::Publisher m_pointcloud_pub;
 
   /*!
-   * \brief Publisher map updates
+   * \brief Publisher for map updates
    */
   ros::Publisher m_map_update_pub;
 
+  /*!
+   * \brief Publisher for map overwrites
+   */
+  ros::Publisher m_map_overwrite_pub;
 
   /*!
    * \brief Saves map in specified path from parameter server
@@ -263,9 +287,24 @@ private:
   bool m_publish_updates;
 
   /*!
-   * \brief Specifies if the node runs in normal or remote mapping mode
+   * \brief Specifies whether the mapping publishes map overwrites for remote use
    */
-  bool m_remote_mode;
+  bool m_publish_overwrites;
+
+  /*!
+   * \brief Specifies whether the mapping applies updates from remote sources
+   */
+  bool m_apply_remote_updates;
+
+  /*!
+   * \brief Specifies whether the mapping applies overwrites from remote sources
+   */
+  bool m_apply_remote_overwrites;
+
+  /*!
+   * \brief Specifies whether the data reduction is enabled
+   */
+  bool m_reduce_data;
 };
 
 #include "VDBMappingROS.hpp"
