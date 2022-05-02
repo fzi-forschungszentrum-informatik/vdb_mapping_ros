@@ -147,10 +147,12 @@ void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   m_config.max_range = config.max_range;
   m_vdb_map->setConfig(m_config);
 
-  m_publish_pointcloud = config.publish_pointcloud;
-  m_publish_vis_marker = config.publish_vis_marker;
-  m_publish_updates    = config.publish_updates;
-  m_publish_overwrites = config.publish_overwrites;
+  m_publish_pointcloud  = config.publish_pointcloud;
+  m_publish_vis_marker  = config.publish_vis_marker;
+  m_publish_updates     = config.publish_updates;
+  m_publish_overwrites  = config.publish_overwrites;
+  m_visualization_z_min = config.visualization_z_min;
+  m_visualization_z_max = config.visualization_z_max;
 }
 
 template <typename VDBMappingT>
@@ -435,8 +437,8 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
                                                     cloud_msg,
                                                     publish_vis_marker,
                                                     publish_pointcloud,
-                                                    -1.0,
-                                                    2.0);
+                                                    m_visualization_z_min,
+                                                    m_visualization_z_max);
 
   if (publish_vis_marker)
   {

@@ -355,6 +355,16 @@ private:
    * \brief Vector of remote mapping source connections
    */
   std::map<std::string, RemoteSource> m_remote_sources;
+
+  /*!
+   * \brief Specifies the lower z bound for the visualization
+   */
+  double m_visualization_z_min;
+
+  /*!
+   * \brief Specifies the upper z bound for the visualization
+   */
+  double m_visualization_z_max;
 };
 
 #include "VDBMappingROS.hpp"
