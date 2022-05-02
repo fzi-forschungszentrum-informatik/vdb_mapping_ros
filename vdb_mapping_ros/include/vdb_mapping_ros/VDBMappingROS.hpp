@@ -434,7 +434,9 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
                                                     visualization_marker_msg,
                                                     cloud_msg,
                                                     publish_vis_marker,
-                                                    publish_pointcloud);
+                                                    publish_pointcloud,
+                                                    -1.0,
+                                                    2.0);
 
   if (publish_vis_marker)
   {

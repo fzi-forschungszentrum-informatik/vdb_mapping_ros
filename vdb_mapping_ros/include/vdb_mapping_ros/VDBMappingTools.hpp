@@ -32,21 +32,35 @@ void VDBMappingTools<VDBMappingT>::createMappingOutput(const typename VDBMapping
                                                        visualization_msgs::Marker& marker_msg,
                                                        sensor_msgs::PointCloud2& cloud_msg,
                                                        const bool create_marker,
-                                                       const bool create_pointcloud)
+                                                       const bool create_pointcloud,
+                                                       const double z_min_thresh,
+                                                       const double z_max_thresh)
 {
   typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
 
   openvdb::CoordBBox bbox = grid->evalActiveVoxelBoundingBox();
   double min_z, max_z;
+
   openvdb::Vec3d min_world_coord = grid->indexToWorld(bbox.getStart());
   openvdb::Vec3d max_world_coord = grid->indexToWorld(bbox.getEnd());
 
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
+  if (z_min_thresh != z_max_thresh && z_min_thresh < z_max_thresh)
+  {
+    min_z = min_z < z_min_thresh ? z_min_thresh : min_z;
+    max_z = max_z > z_max_thresh ? z_max_thresh : max_z;
+  }
+
 
   for (typename VDBMappingT::GridT::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter)
   {
     openvdb::Vec3d world_coord = grid->indexToWorld(iter.getCoord());
+
+    if (world_coord.z() < min_z || world_coord.z() > max_z)
+    {
+      continue;
+    }
 
     if (create_marker)
     {

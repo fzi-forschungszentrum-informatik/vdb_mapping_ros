@@ -59,8 +59,10 @@ public:
                                   const std::string& frame_id,
                                   visualization_msgs::Marker& marker_msg,
                                   sensor_msgs::PointCloud2& cloud_msg,
-                                  bool create_marker,
-                                  bool create_pointcloud);
+                                  const bool create_marker,
+                                  const bool create_pointcloud,
+                                  const double z_min_thresh,
+                                  const double z_max_thresh);
 
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
