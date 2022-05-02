@@ -99,12 +99,7 @@ void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t)
 {
   ROS_INFO("Dynamic reconfigure of parameters.");
-
-  m_config.max_range      = config.max_range;
-  m_config.prob_hit       = config.prob_hit;
-  m_config.prob_miss      = config.prob_miss;
-  m_config.prob_thres_min = config.prob_thres_min;
-  m_config.prob_thres_max = config.prob_thres_max;
+  m_config.max_range = config.max_range;
   m_vdb_map->setConfig(m_config);
 
   m_publish_pointcloud = config.publish_pointcloud;
