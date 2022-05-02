@@ -48,6 +48,9 @@
 
 #include <std_srvs/Trigger.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <vdb_mapping_ros/VDBMappingROSConfig.h>
+
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
@@ -133,9 +136,17 @@ public:
   /*!
    * \brief Callback for map reset service call
    *
+   * \param res result of the map reset
    * \returns result of map reset
    */
   bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
+
+  /*!
+   * \brief Callback for dynamic reconfigure of parameters
+   *
+   * \param config new configuration
+   */
+  void dynamicReconfigureCallback(vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t);
 
 private:
   /*!
@@ -195,6 +206,11 @@ private:
    * \brief Service for reset map
    */
   ros::ServiceServer m_map_reset_service;
+
+  /*!
+   * \brief Service for dynamic reconfigure of parameters
+   */
+  dynamic_reconfigure::Server<vdb_mapping_ros::VDBMappingROSConfig> m_dynamic_reconfigure_service;
 
   /*!
    * \brief Transformation buffer

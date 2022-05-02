@@ -14,6 +14,7 @@ endif()
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   pcl_conversions
   pcl_ros
   roscpp
@@ -23,12 +24,18 @@ find_package(catkin REQUIRED COMPONENTS
   vdb_mapping_msgs
   visualization_msgs
 )
+
 find_package(vdb_mapping REQUIRED)
+
+generate_dynamic_reconfigure_options(
+  cfg/VDBMappingROS.cfg
+)
 
 catkin_package(
   INCLUDE_DIRS
     include
   CATKIN_DEPENDS
+    dynamic_reconfigure
     pcl_conversions
     pcl_ros
     roscpp
@@ -58,7 +65,7 @@ add_executable(${PROJECT_NAME}_node src/vdb_mapping_ros_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node

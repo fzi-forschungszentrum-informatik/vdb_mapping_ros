@@ -90,6 +90,21 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
   m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
+  m_dynamic_reconfigure_service.setCallback(
+    boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
+}
+
+template <typename VDBMappingT>
+void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
+  vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t)
+{
+  ROS_INFO("Dynamic reconfigure of parameters.");
+  m_config.max_range = config.max_range;
+  m_vdb_map->setConfig(m_config);
+
+  m_publish_pointcloud = config.publish_pointcloud;
+  m_publish_vis_marker = config.publish_vis_marker;
+  m_publish_updates    = config.publish_updates;
 }
 
 template <typename VDBMappingT>
