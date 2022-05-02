@@ -28,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(vdb_mapping REQUIRED)
 
 generate_dynamic_reconfigure_options(
-  cfg/vdb_mapping_ros.cfg
+  cfg/VDBMappingROS.cfg
 )
 
 catkin_package(
