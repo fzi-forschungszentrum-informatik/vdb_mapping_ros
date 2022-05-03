@@ -119,6 +119,8 @@ void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   m_publish_pointcloud = config.publish_pointcloud;
   m_publish_vis_marker = config.publish_vis_marker;
   m_publish_updates    = config.publish_updates;
+  m_get_map_section_service_server =
+    m_priv_nh.advertiseService("get_map_section", &VDBMappingROS::getMapSectionCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -176,6 +178,44 @@ VDBMappingROS<VDBMappingT>::getMapSection(const double min_x,
                                           const double max_z)
 {
   return m_vdb_map->getMapSection(min_x, min_y, min_z, max_x, max_y, max_z);
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
+  vdb_mapping_msgs::GetMapSection::Request& req, vdb_mapping_msgs::GetMapSection::Response& res)
+{
+  geometry_msgs::TransformStamped source_to_map_tf;
+  try
+  {
+    source_to_map_tf = m_tf_buffer.lookupTransform(
+      m_map_frame, req.header.frame_id, ros::Time(0), ros::Duration(1.0));
+  }
+  catch (tf::TransformException& ex)
+  {
+    ROS_ERROR_STREAM("Transform from source to map frame failed: " << ex.what());
+    res.success = false;
+    return false;
+  }
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr corners(new pcl::PointCloud<pcl::PointXYZ>());
+  corners->points.push_back(pcl::PointXYZ(req.min_x, req.min_y, req.min_z));
+  corners->points.push_back(pcl::PointXYZ(req.min_x, req.min_y, req.max_z));
+  corners->points.push_back(pcl::PointXYZ(req.min_x, req.max_y, req.min_z));
+  corners->points.push_back(pcl::PointXYZ(req.min_x, req.max_y, req.max_z));
+  corners->points.push_back(pcl::PointXYZ(req.max_x, req.min_y, req.min_z));
+  corners->points.push_back(pcl::PointXYZ(req.max_x, req.min_y, req.max_z));
+  corners->points.push_back(pcl::PointXYZ(req.max_x, req.max_y, req.min_z));
+  corners->points.push_back(pcl::PointXYZ(req.max_x, req.max_y, req.max_z));
+  pcl::transformPointCloud(*corners, *corners, tf2::transformToEigen(source_to_map_tf).matrix());
+
+  pcl::PointXYZ minPt, maxPt;
+  pcl::getMinMax3D(*corners, minPt, maxPt);
+
+  m_map_overwrite_pub.publish(
+    gridToMsg(getMapSection(minPt.x, minPt.y, minPt.z, maxPt.x, maxPt.y, maxPt.z)));
+
+  res.success = true;
+  return true;
 }
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::alignedCloudCallback(
