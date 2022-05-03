@@ -167,6 +167,17 @@ const typename VDBMappingT::GridT::Ptr VDBMappingROS<VDBMappingT>::getMap()
 }
 
 template <typename VDBMappingT>
+const typename VDBMappingT::UpdateGridT::Ptr
+VDBMappingROS<VDBMappingT>::getMapSection(const double min_x,
+                                          const double min_y,
+                                          const double min_z,
+                                          const double max_x,
+                                          const double max_y,
+                                          const double max_z)
+{
+  return m_vdb_map->getMapSection(min_x, min_y, min_z, max_x, max_y, max_z);
+}
+template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::alignedCloudCallback(
   const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
