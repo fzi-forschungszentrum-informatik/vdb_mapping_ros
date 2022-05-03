@@ -9,6 +9,7 @@ project(vdb_mapping_msgs)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   message_generation
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,6 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   LoadMap.srv
+  GetMapSection.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -65,6 +67,7 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
+    std_msgs
 )
 
 ################################################
