@@ -33,8 +33,8 @@ void VDBMappingTools<VDBMappingT>::createMappingOutput(const typename VDBMapping
                                                        sensor_msgs::PointCloud2& cloud_msg,
                                                        const bool create_marker,
                                                        const bool create_pointcloud,
-                                                       const double z_min_thresh,
-                                                       const double z_max_thresh)
+                                                       const double lower_z_limit,
+                                                       const double upper_z_limit)
 {
   typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
 
@@ -46,10 +46,10 @@ void VDBMappingTools<VDBMappingT>::createMappingOutput(const typename VDBMapping
 
   min_z = min_world_coord.z();
   max_z = max_world_coord.z();
-  if (z_min_thresh != z_max_thresh && z_min_thresh < z_max_thresh)
+  if (lower_z_limit != upper_z_limit && lower_z_limit < upper_z_limit)
   {
-    min_z = min_z < z_min_thresh ? z_min_thresh : min_z;
-    max_z = max_z > z_max_thresh ? z_max_thresh : max_z;
+    min_z = min_z < lower_z_limit ? lower_z_limit : min_z;
+    max_z = max_z > upper_z_limit ? upper_z_limit : max_z;
   }
 
 

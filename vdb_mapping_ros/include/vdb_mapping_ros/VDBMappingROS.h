@@ -359,12 +359,12 @@ private:
   /*!
    * \brief Specifies the lower z bound for the visualization
    */
-  double m_visualization_z_min;
+  double m_lower_visualization_z_limit;
 
   /*!
    * \brief Specifies the upper z bound for the visualization
    */
-  double m_visualization_z_max;
+  double m_upper_visualization_z_limit;
 };
 
 #include "VDBMappingROS.hpp"

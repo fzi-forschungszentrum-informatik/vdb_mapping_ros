@@ -61,8 +61,8 @@ public:
                                   sensor_msgs::PointCloud2& cloud_msg,
                                   const bool create_marker,
                                   const bool create_pointcloud,
-                                  const double z_min_thresh,
-                                  const double z_max_thresh);
+                                  const double lower_z_limit,
+                                  const double upper_z_limit);
 
   /*!
    * \brief Calculates a height correlating color coding using HSV color space
