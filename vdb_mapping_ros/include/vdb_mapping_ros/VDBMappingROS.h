@@ -314,6 +314,7 @@ private:
    */
   bool m_apply_remote_overwrites;
 
+  bool m_apply_raw_sensor_data;
   /*!
    * \brief Specifies whether the data reduction is enabled
    */
