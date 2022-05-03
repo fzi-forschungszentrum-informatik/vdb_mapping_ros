@@ -13,33 +13,36 @@
   <arg name="publish_vis_marker"      default="true"/>
   <arg name="publish_updates"         default="false"/>
   <arg name="publish_overwrites"      default="false"/>
-  <arg name="apply_remote_updates"    default="true"/>
+  <arg name="apply_remote_updates"    default="false"/>
   <arg name="apply_remote_overwrites" default="false"/>
+  <arg name="apply_remote_sections"   default="true"/>
   <arg name="apply_raw_sensor_data"   default="false"/>
   <arg name="reduce_data"             default="false"/>
   <arg name="map_save_dir"            default=""/>
 
   <node pkg="vdb_mapping_ros" type="vdb_mapping_ros_node" name="vdb_remote_mapping" output="screen">
-    <param name="aligned_points"          type="string"  value="$(arg aligned_points)"/>
-    <param name="raw_points"              type="string"  value="$(arg raw_points)"/>
-    <param name="sensor_frame"            type="string"  value="$(arg sensor_frame)"/>
-    <param name="map_frame"               type="string"  value="$(arg map_frame)"/>
-    <param name="resolution"              type="double"  value="$(arg resolution)"/>
-    <param name="max_range"               type="double"  value="$(arg max_range)"/>
-    <param name="prob_hit"                type="double"  value="$(arg prob_hit)"/>
-    <param name="prob_miss"               type="double"  value="$(arg prob_miss)"/>
-    <param name="prob_thres_min"          type="double"  value="$(arg prob_thres_min)"/>
-    <param name="prob_thres_max"          type="double"  value="$(arg prob_thres_max)"/>
-    <param name="publish_pointcloud"      type="boolean" value="$(arg publish_pointcloud)"/>
-    <param name="publish_vis_marker"      type="boolean" value="$(arg publish_vis_marker)"/>
-    <param name="publish_updates"         type="boolean" value="$(arg publish_updates)"/>
-    <param name="publish_overwrites"      type="boolean" value="$(arg publish_overwrites)"/>
-    <param name="apply_remote_updates"    type="boolean" value="$(arg apply_remote_updates)"/>
-    <param name="apply_remote_overwrites" type="boolean" value="$(arg apply_remote_overwrites)"/>
-    <param name="apply_raw_sensor_data"   type="boolean" value="$(arg apply_raw_sensor_data)"/>
-    <param name="reduce_data"             type="boolean" value="$(arg reduce_data)"/>
-    <param name="map_save_dir"            type="string" value="$(arg map_save_dir)"/>
-    <remap from="vdb_map_update"          to="vdb_mapping/vdb_map_update"/>
-    <remap from="vdb_map_overwrites"      to="vdb_mapping/vdb_map_overwrites"/>
+    <param name="aligned_points"            type="string"  value="$(arg aligned_points)"/>
+    <param name="raw_points"                type="string"  value="$(arg raw_points)"/>
+    <param name="sensor_frame"              type="string"  value="$(arg sensor_frame)"/>
+    <param name="map_frame"                 type="string"  value="$(arg map_frame)"/>
+    <param name="resolution"                type="double"  value="$(arg resolution)"/>
+    <param name="max_range"                 type="double"  value="$(arg max_range)"/>
+    <param name="prob_hit"                  type="double"  value="$(arg prob_hit)"/>
+    <param name="prob_miss"                 type="double"  value="$(arg prob_miss)"/>
+    <param name="prob_thres_min"            type="double"  value="$(arg prob_thres_min)"/>
+    <param name="prob_thres_max"            type="double"  value="$(arg prob_thres_max)"/>
+    <param name="publish_pointcloud"        type="boolean" value="$(arg publish_pointcloud)"/>
+    <param name="publish_vis_marker"        type="boolean" value="$(arg publish_vis_marker)"/>
+    <param name="publish_updates"           type="boolean" value="$(arg publish_updates)"/>
+    <param name="publish_overwrites"        type="boolean" value="$(arg publish_overwrites)"/>
+    <param name="apply_remote_updates"      type="boolean" value="$(arg apply_remote_updates)"/>
+    <param name="apply_remote_overwrites"   type="boolean" value="$(arg apply_remote_overwrites)"/>
+    <param name="apply_remote_sections"     type="boolean" value="$(arg apply_remote_sections)"/>
+    <param name="apply_raw_sensor_data"     type="boolean" value="$(arg apply_raw_sensor_data)"/>
+    <param name="reduce_data"               type="boolean" value="$(arg reduce_data)"/>
+    <param name="map_save_dir"              type="string" value="$(arg map_save_dir)"/>
+    <remap from="vdb_map_update"            to="vdb_mapping/vdb_map_update"/>
+    <remap from="vdb_map_overwrites"        to="vdb_mapping/vdb_map_overwrites"/>
+    <remap from="vdb_map_section_overwrite" to="vdb_mapping/vdb_map_section_overwrite"/>
   </node>
 </launch>

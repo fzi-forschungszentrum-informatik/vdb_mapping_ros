@@ -15,6 +15,7 @@
   <arg name="publish_overwrites"      default="true"/>
   <arg name="apply_remote_updates"    default="false"/>
   <arg name="apply_remote_overwrites" default="false"/>
+  <arg name="apply_remote_sections"   default="false"/>
   <arg name="apply_raw_sensor_data"   default="true"/>
   <arg name="reduce_data"             default="false"/>
   <arg name="map_save_dir"            default=""/>
@@ -36,6 +37,7 @@
     <param name="publish_overwrites"      type="boolean" value="$(arg publish_overwrites)"/>
     <param name="apply_remote_updates"    type="boolean" value="$(arg apply_remote_updates)"/>
     <param name="apply_remote_overwrites" type="boolean" value="$(arg apply_remote_overwrites)"/>
+    <param name="apply_remote_sections"   type="boolean" value="$(arg apply_remote_sections)"/>
     <param name="apply_raw_sensor_data"   type="boolean" value="$(arg apply_raw_sensor_data)"/>
     <param name="reduce_data"             type="boolean" value="$(arg reduce_data)"/>
     <param name="map_save_dir"            type="string" value="$(arg map_save_dir)"/>

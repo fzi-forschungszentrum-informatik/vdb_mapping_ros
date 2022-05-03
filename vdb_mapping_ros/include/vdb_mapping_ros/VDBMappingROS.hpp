@@ -53,6 +53,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<bool>("publish_overwrites", m_publish_overwrites, false);
   m_priv_nh.param<bool>("apply_remote_updates", m_apply_remote_updates, false);
   m_priv_nh.param<bool>("apply_remote_overwrites", m_apply_remote_overwrites, false);
+  m_priv_nh.param<bool>("apply_remote_sections", m_apply_remote_sections, true);
   m_priv_nh.param<bool>("apply_raw_sensor_data", m_apply_raw_sensor_data, true);
 
   m_priv_nh.param<bool>("reduce_data", m_reduce_data, false);
@@ -90,14 +91,22 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     m_map_overwrite_sub =
       m_nh.subscribe("vdb_map_overwrites", 1, &VDBMappingROS::mapOverwriteCallback, this);
   }
+  if (m_apply_remote_sections)
+  {
+    m_map_section_overwrite_sub =
+      m_nh.subscribe("vdb_map_section_overwrite", 1, &VDBMappingROS::mapOverwriteCallback, this);
+  }
 
-  if(m_apply_raw_sensor_data)
+  if (m_apply_raw_sensor_data)
   {
     m_sensor_cloud_sub =
       m_nh.subscribe(raw_points_topic, 1, &VDBMappingROS::sensorCloudCallback, this);
     m_aligned_cloud_sub =
       m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
   }
+
+  m_map_section_overwrite_pub =
+    m_priv_nh.advertise<std_msgs::String>("vdb_map_section_overwrite", 1, true);
 
   m_visualization_marker_pub =
     m_priv_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
@@ -215,12 +224,13 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
   pcl::PointXYZ minPt, maxPt;
   pcl::getMinMax3D(*corners, minPt, maxPt);
 
-  m_map_overwrite_pub.publish(
+  m_map_section_overwrite_pub.publish(
     gridToMsg(getMapSection(minPt.x, minPt.y, minPt.z, maxPt.x, maxPt.y, maxPt.z)));
 
   res.success = true;
   return true;
 }
+
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::alignedCloudCallback(
   const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
@@ -305,7 +315,6 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   {
     m_map_overwrite_pub.publish(gridToMsg(overwrite));
   }
-
   publishMap();
 }
 

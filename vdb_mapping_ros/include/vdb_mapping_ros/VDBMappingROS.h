@@ -208,6 +208,11 @@ private:
   ros::Subscriber m_map_overwrite_sub;
 
   /*!
+   * \brief Subscriber for map section overwrites
+   */
+  ros::Subscriber m_map_section_overwrite_sub;
+
+  /*!
    * \brief Publisher for the marker array
    */
   ros::Publisher m_visualization_marker_pub;
@@ -226,6 +231,11 @@ private:
    * \brief Publisher for map overwrites
    */
   ros::Publisher m_map_overwrite_pub;
+
+  /*!
+   * \brief Publisher for map section overwrites
+   */
+  ros::Publisher m_map_section_overwrite_pub;
 
   /*!
    * \brief Saves map in specified path from parameter server
@@ -313,6 +323,11 @@ private:
    * \brief Specifies whether the mapping applies overwrites from remote sources
    */
   bool m_apply_remote_overwrites;
+
+  /*!
+   * \brief Specifies whether the mapping applies map section overwrites from remote sources
+   */
+  bool m_apply_remote_sections;
 
   bool m_apply_raw_sensor_data;
   /*!
