@@ -115,10 +115,19 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_map_reset_service =
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
 
-  m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
-  m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
   m_dynamic_reconfigure_service.setCallback(
     boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
+
+  m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
+  m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
+  m_get_map_section_service =
+    m_priv_nh.advertiseService("get_map_section", &VDBMappingROS::getMapSectionCallback, this);
+
+  m_trigger_map_section_update_service = m_priv_nh.advertiseService(
+    "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
+
+  m_get_map_section_client =
+    m_nh.serviceClient<vdb_mapping_msgs::GetMapSection>("/vdb_mapping/get_map_section");
 }
 
 template <typename VDBMappingT>
@@ -132,8 +141,6 @@ void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   m_publish_pointcloud = config.publish_pointcloud;
   m_publish_vis_marker = config.publish_vis_marker;
   m_publish_updates    = config.publish_updates;
-  m_get_map_section_service_server =
-    m_priv_nh.advertiseService("get_map_section", &VDBMappingROS::getMapSectionCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -208,6 +215,23 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
   res.success = true;
 
   return true;
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
+  vdb_mapping_msgs::TriggerMapSectionUpdate::Request& req,
+  vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res)
+{
+  vdb_mapping_msgs::GetMapSection srv;
+  srv.request.header = req.header;
+  srv.request.bbox   = req.bbox;
+  m_get_map_section_client.call(srv);
+
+  m_vdb_map->overwriteMap(strToGrid(srv.response.map));
+  publishMap();
+
+  res.success = srv.response.success;
+  return res.success;
 }
 
 template <typename VDBMappingT>

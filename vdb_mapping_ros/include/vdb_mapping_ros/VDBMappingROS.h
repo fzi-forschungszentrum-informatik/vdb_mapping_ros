@@ -33,6 +33,7 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 #include <vdb_mapping_msgs/GetMapSection.h>
+#include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <vdb_mapping_msgs/LoadMap.h>
 #include <visualization_msgs/Marker.h>
 
@@ -160,6 +161,9 @@ public:
   bool getMapSectionCallback(vdb_mapping_msgs::GetMapSection::Request& req,
                              vdb_mapping_msgs::GetMapSection::Response& res);
 
+  bool triggerMapSectionUpdateCallback(vdb_mapping_msgs::TriggerMapSectionUpdate::Request& req,
+                                       vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res);
+
   /*!
    * \brief Callback for map reset service call
    *
@@ -246,7 +250,12 @@ private:
    */
   ros::ServiceServer m_load_map_service_server;
 
-  ros::ServiceServer m_get_map_section_service_server;
+  ros::ServiceServer m_get_map_section_service;
+
+  ros::ServiceClient m_get_map_section_client;
+
+  ros::ServiceServer m_trigger_map_section_update_service;
+
 
   /*!
    * \brief Service for reset map
