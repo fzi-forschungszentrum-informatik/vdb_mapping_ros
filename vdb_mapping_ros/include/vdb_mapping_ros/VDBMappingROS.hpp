@@ -198,15 +198,13 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return false;
   }
 
-  m_map_section_overwrite_pub.publish(
-    gridToMsg(m_vdb_map->getMapSection(req.min_x,
-                                       req.min_y,
-                                       req.min_z,
-                                       req.max_x,
-                                       req.max_y,
-                                       req.max_z,
-                                       tf2::transformToEigen(source_to_map_tf).matrix())));
-
+  res.map = gridToStr(m_vdb_map->getMapSection(req.bbox.min_x,
+                                               req.bbox.min_y,
+                                               req.bbox.min_z,
+                                               req.bbox.max_x,
+                                               req.bbox.max_y,
+                                               req.bbox.max_z,
+                                               tf2::transformToEigen(source_to_map_tf).matrix()));
   res.success = true;
 
   return true;
