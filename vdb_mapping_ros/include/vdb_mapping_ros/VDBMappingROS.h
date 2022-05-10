@@ -33,8 +33,8 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 #include <vdb_mapping_msgs/GetMapSection.h>
-#include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <vdb_mapping_msgs/LoadMap.h>
+#include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>

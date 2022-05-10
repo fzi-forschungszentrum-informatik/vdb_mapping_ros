@@ -205,7 +205,7 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return false;
   }
 
-  res.map = gridToStr(m_vdb_map->getMapSection(req.bbox.min_x,
+  res.map     = gridToStr(m_vdb_map->getMapSection(req.bbox.min_x,
                                                req.bbox.min_y,
                                                req.bbox.min_z,
                                                req.bbox.max_x,
