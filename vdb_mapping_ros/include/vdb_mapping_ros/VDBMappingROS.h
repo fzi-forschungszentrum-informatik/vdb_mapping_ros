@@ -114,11 +114,6 @@ public:
   void publishMap() const;
 
   /*!
-   * \brief Publishes a grid update as compressed serialized string
-   *
-   * \param update Update grid
-   */
-  /*!
    * \brief Creates a compressed Bitstream as ROS msg from an input grid
    *
    * \param update Update grid
@@ -127,7 +122,11 @@ public:
    */
   std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
+  std::string gridToStr(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+
   typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
+
+  typename VDBMappingT::UpdateGridT::Ptr strToGrid(const std::string& msg) const;
 
   /*!
    * \brief Listens to map updates and creats a map from these

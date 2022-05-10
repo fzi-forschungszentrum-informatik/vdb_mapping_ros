@@ -301,20 +301,34 @@ template <typename VDBMappingT>
 std_msgs::String
 VDBMappingROS<VDBMappingT>::gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const
 {
+  std_msgs::String msg;
+  msg.data = gridToStr(update);
+  return msg;
+}
+
+template <typename VDBMappingT>
+std::string
+VDBMappingROS<VDBMappingT>::gridToStr(const typename VDBMappingT::UpdateGridT::Ptr update) const
+{
   openvdb::GridPtrVec grids;
   grids.push_back(update);
   std::ostringstream oss(std::ios_base::binary);
   openvdb::io::Stream(oss).write(grids);
-  std_msgs::String msg;
-  msg.data = oss.str();
-  return msg;
+  return oss.str();
 }
 
 template <typename VDBMappingT>
 typename VDBMappingT::UpdateGridT::Ptr
 VDBMappingROS<VDBMappingT>::msgToGrid(const std_msgs::String::ConstPtr& msg) const
 {
-  std::istringstream iss(msg->data);
+  return strToGrid(msg->data);
+}
+
+template <typename VDBMappingT>
+typename VDBMappingT::UpdateGridT::Ptr
+VDBMappingROS<VDBMappingT>::strToGrid(const std::string& msg) const
+{
+  std::istringstream iss(msg);
   openvdb::io::Stream strm(iss);
   openvdb::GridPtrVecPtr grids;
   grids = strm.getGrids();
@@ -324,7 +338,6 @@ VDBMappingROS<VDBMappingT>::msgToGrid(const std_msgs::String::ConstPtr& msg) con
     openvdb::gridPtrCast<typename VDBMappingT::UpdateGridT>(grids->front());
   return update_grid;
 }
-
 
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg)
