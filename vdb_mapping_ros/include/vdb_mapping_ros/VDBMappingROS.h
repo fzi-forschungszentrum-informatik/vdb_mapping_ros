@@ -46,7 +46,6 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <pcl/common/common.h>
 
 #include <std_srvs/Trigger.h>
 
@@ -151,13 +150,14 @@ public:
    */
   const typename VDBMappingT::GridT::Ptr getMap();
 
-  const typename VDBMappingT::UpdateGridT::Ptr getMapSection(const double min_x,
-                                                             const double min_y,
-                                                             const double min_z,
-                                                             const double max_x,
-                                                             const double max_y,
-                                                             const double max_z);
-
+  /*!
+   * \brief Callback for requesting parts of the map
+   *
+   * \param req Coordinates and reference of the map section
+   * \param res Result of section request
+   *
+   * \returns Result of section request
+   */
   bool getMapSectionCallback(vdb_mapping_msgs::GetMapSection::Request& req,
                              vdb_mapping_msgs::GetMapSection::Response& res);
 

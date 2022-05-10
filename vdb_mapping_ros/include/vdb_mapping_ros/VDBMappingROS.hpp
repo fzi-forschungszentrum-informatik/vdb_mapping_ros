@@ -182,18 +182,6 @@ const typename VDBMappingT::GridT::Ptr VDBMappingROS<VDBMappingT>::getMap()
 }
 
 template <typename VDBMappingT>
-const typename VDBMappingT::UpdateGridT::Ptr
-VDBMappingROS<VDBMappingT>::getMapSection(const double min_x,
-                                          const double min_y,
-                                          const double min_z,
-                                          const double max_x,
-                                          const double max_y,
-                                          const double max_z)
-{
-  return m_vdb_map->getMapSection(min_x, min_y, min_z, max_x, max_y, max_z);
-}
-
-template <typename VDBMappingT>
 bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
   vdb_mapping_msgs::GetMapSection::Request& req, vdb_mapping_msgs::GetMapSection::Response& res)
 {
@@ -210,24 +198,17 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return false;
   }
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr corners(new pcl::PointCloud<pcl::PointXYZ>());
-  corners->points.push_back(pcl::PointXYZ(req.min_x, req.min_y, req.min_z));
-  corners->points.push_back(pcl::PointXYZ(req.min_x, req.min_y, req.max_z));
-  corners->points.push_back(pcl::PointXYZ(req.min_x, req.max_y, req.min_z));
-  corners->points.push_back(pcl::PointXYZ(req.min_x, req.max_y, req.max_z));
-  corners->points.push_back(pcl::PointXYZ(req.max_x, req.min_y, req.min_z));
-  corners->points.push_back(pcl::PointXYZ(req.max_x, req.min_y, req.max_z));
-  corners->points.push_back(pcl::PointXYZ(req.max_x, req.max_y, req.min_z));
-  corners->points.push_back(pcl::PointXYZ(req.max_x, req.max_y, req.max_z));
-  pcl::transformPointCloud(*corners, *corners, tf2::transformToEigen(source_to_map_tf).matrix());
-
-  pcl::PointXYZ minPt, maxPt;
-  pcl::getMinMax3D(*corners, minPt, maxPt);
-
   m_map_section_overwrite_pub.publish(
-    gridToMsg(getMapSection(minPt.x, minPt.y, minPt.z, maxPt.x, maxPt.y, maxPt.z)));
+    gridToMsg(m_vdb_map->getMapSection(req.min_x,
+                                       req.min_y,
+                                       req.min_z,
+                                       req.max_x,
+                                       req.max_y,
+                                       req.max_z,
+                                       tf2::transformToEigen(source_to_map_tf).matrix())));
 
   res.success = true;
+
   return true;
 }
 
