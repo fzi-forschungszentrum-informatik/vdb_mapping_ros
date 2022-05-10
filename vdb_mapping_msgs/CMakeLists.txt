@@ -104,6 +104,7 @@ catkin_package(
 #  LIBRARIES esasrc_msgs
   CATKIN_DEPENDS 
     message_runtime
+    std_msgs
 #  DEPENDS system_lib
 )
 
