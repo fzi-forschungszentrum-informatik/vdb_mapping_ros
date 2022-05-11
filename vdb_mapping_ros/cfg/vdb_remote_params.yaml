@@ -16,7 +16,7 @@ apply_raw_sensor_data: false
 reduce_data: false
 map_save_dir: ""
 
-remote_sources: [vdb_mapping, husky, spot]
+remote_sources: [vdb_mapping]
 vdb_mapping:
   namespace: vdb_mapping
   apply_remote_updates: false
