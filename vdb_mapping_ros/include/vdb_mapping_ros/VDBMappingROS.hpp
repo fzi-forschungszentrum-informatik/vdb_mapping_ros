@@ -150,6 +150,7 @@ void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   m_publish_pointcloud = config.publish_pointcloud;
   m_publish_vis_marker = config.publish_vis_marker;
   m_publish_updates    = config.publish_updates;
+  m_publish_overwrites = config.publish_overwrites;
 }
 
 template <typename VDBMappingT>
