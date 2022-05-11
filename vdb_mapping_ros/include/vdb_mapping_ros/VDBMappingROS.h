@@ -132,10 +132,31 @@ public:
    */
   std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
+  /*!
+   * \brief Creates a compressed Bitstream as string from an input grid
+   *
+   * \param update Update grid
+   *
+   * \returns bitstream
+   */
   std::string gridToStr(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
+  /*!
+   * \brief Unpacks an update grid from a compressed bitstream
+   *
+   * \param msg Compressed Bitstream
+   *
+   * \returns Update Grid
+   */
   typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
 
+  /*!
+   * \brief Unpacks an update grid from a ROS msg
+   *
+   * \param msg Compressed Bitstream as ROS msg
+   *
+   * \returns Update Grid
+   */
   typename VDBMappingT::UpdateGridT::Ptr strToGrid(const std::string& msg) const;
 
   /*!
@@ -163,13 +184,21 @@ public:
    * \brief Callback for requesting parts of the map
    *
    * \param req Coordinates and reference of the map section
-   * \param res Result of section request
+   * \param res Result of section request, which includes the returned map
    *
    * \returns Result of section request
    */
   bool getMapSectionCallback(vdb_mapping_msgs::GetMapSection::Request& req,
                              vdb_mapping_msgs::GetMapSection::Response& res);
 
+  /*!
+   * \brief Callback for triggering a map section request on a remote source
+   *
+   * \param req Coordinates, reference frame and remote source identifier of the map section
+   * \param res Result of triggering section request
+   *
+   * \returns Result of triggering section request
+   */
   bool triggerMapSectionUpdateCallback(vdb_mapping_msgs::TriggerMapSectionUpdate::Request& req,
                                        vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res);
 
@@ -239,10 +268,15 @@ private:
    */
   ros::ServiceServer m_load_map_service_server;
 
+  /*!
+   * \brief Service for map section requests
+   */
   ros::ServiceServer m_get_map_section_service;
 
+  /*!
+   * \brief Service for triggering the map section request on a remote source
+   */
   ros::ServiceServer m_trigger_map_section_update_service;
-
 
   /*!
    * \brief Service for reset map
