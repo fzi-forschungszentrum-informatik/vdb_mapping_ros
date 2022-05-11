@@ -105,7 +105,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   if (m_publish_updates)
   {
-    m_map_update_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_update", 1, true);
+    m_map_update_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_updates", 1, true);
   }
   if (m_publish_overwrites)
   {
