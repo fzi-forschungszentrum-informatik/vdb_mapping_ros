@@ -3,8 +3,5 @@
 
   <node pkg="vdb_mapping_ros" type="vdb_mapping_ros_node" name="vdb_remote_mapping" output="screen">
     <rosparam file="$(arg config)" command="load"/>
-    <remap from="vdb_map_update"            to="vdb_mapping/vdb_map_update"/>
-    <remap from="vdb_map_overwrites"        to="vdb_mapping/vdb_map_overwrites"/>
-    <remap from="vdb_map_section_overwrite" to="vdb_mapping/vdb_map_section_overwrite"/>
   </node>
 </launch>

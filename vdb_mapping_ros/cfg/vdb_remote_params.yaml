@@ -12,9 +12,12 @@ publish_pointcloud: true
 publish_vis_marker: true
 publish_updates: false
 publish_overwrites: false
-apply_remote_updates: false
-apply_remote_overwrites: false
-apply_remote_sections: true
 apply_raw_sensor_data: false
 reduce_data: false
 map_save_dir: ""
+
+remote_sources: [vdb_mapping, husky, spot]
+vdb_mapping:
+  namespace: vdb_mapping
+  apply_remote_updates: false
+  apply_remote_overwrites: true
