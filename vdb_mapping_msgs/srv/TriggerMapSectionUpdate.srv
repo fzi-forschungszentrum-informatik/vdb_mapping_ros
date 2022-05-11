@@ -1,4 +1,5 @@
 Header header
+string remote_source
 BoundingBox bbox
 ---
 bool success

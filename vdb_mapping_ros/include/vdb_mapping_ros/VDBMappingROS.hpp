@@ -51,9 +51,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<bool>("publish_vis_marker", m_publish_vis_marker, true);
   m_priv_nh.param<bool>("publish_updates", m_publish_updates, false);
   m_priv_nh.param<bool>("publish_overwrites", m_publish_overwrites, false);
-  m_priv_nh.param<bool>("apply_remote_updates", m_apply_remote_updates, false);
-  m_priv_nh.param<bool>("apply_remote_overwrites", m_apply_remote_overwrites, false);
-  m_priv_nh.param<bool>("apply_remote_sections", m_apply_remote_sections, true);
   m_priv_nh.param<bool>("apply_raw_sensor_data", m_apply_raw_sensor_data, true);
 
   m_priv_nh.param<bool>("reduce_data", m_reduce_data, false);
@@ -74,6 +71,38 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   m_priv_nh.param<std::string>("raw_points", raw_points_topic, "");
   m_priv_nh.param<std::string>("aligned_points", aligned_points_topic, "");
 
+
+  // Setting up remote sources
+  std::vector<std::string> source_ids;
+  m_priv_nh.param<std::vector<std::string> >(
+    "remote_sources", source_ids, std::vector<std::string>());
+
+  for (auto& source_id : source_ids)
+  {
+    std::string remote_namespace;
+    m_priv_nh.param<std::string>(source_id + "/namespace", remote_namespace, "");
+
+    RemoteSource remote_source;
+    m_priv_nh.param<bool>(
+      source_id + "/apply_remote_updates", remote_source.apply_remote_updates, false);
+    m_priv_nh.param<bool>(
+      source_id + "/apply_remote_overwrites", remote_source.apply_remote_overwrites, false);
+
+    if (remote_source.apply_remote_updates)
+    {
+      remote_source.map_update_sub = m_nh.subscribe(
+        remote_namespace + "/vdb_map_updates", 1, &VDBMappingROS::mapUpdateCallback, this);
+    }
+    if (remote_source.apply_remote_overwrites)
+    {
+      remote_source.map_overwrite_sub = m_nh.subscribe(
+        remote_namespace + "/vdb_map_overwrites", 1, &VDBMappingROS::mapUpdateCallback, this);
+    }
+    remote_source.get_map_section_client =
+      m_nh.serviceClient<vdb_mapping_msgs::GetMapSection>(remote_namespace + "/get_map_section");
+    m_remote_sources.insert(std::make_pair(source_id, remote_source));
+  }
+
   if (m_publish_updates)
   {
     m_map_update_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_update", 1, true);
@@ -81,20 +110,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
   if (m_publish_overwrites)
   {
     m_map_overwrite_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_overwrites", 1, true);
-  }
-  if (m_apply_remote_updates)
-  {
-    m_map_update_sub = m_nh.subscribe("vdb_map_update", 1, &VDBMappingROS::mapUpdateCallback, this);
-  }
-  if (m_apply_remote_overwrites)
-  {
-    m_map_overwrite_sub =
-      m_nh.subscribe("vdb_map_overwrites", 1, &VDBMappingROS::mapOverwriteCallback, this);
-  }
-  if (m_apply_remote_sections)
-  {
-    m_map_section_overwrite_sub =
-      m_nh.subscribe("vdb_map_section_overwrite", 1, &VDBMappingROS::mapOverwriteCallback, this);
   }
 
   if (m_apply_raw_sensor_data)
@@ -104,9 +119,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     m_aligned_cloud_sub =
       m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
   }
-
-  m_map_section_overwrite_pub =
-    m_priv_nh.advertise<std_msgs::String>("vdb_map_section_overwrite", 1, true);
 
   m_visualization_marker_pub =
     m_priv_nh.advertise<visualization_msgs::Marker>("vdb_map_visualization", 1, true);
@@ -125,9 +137,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
 
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
-
-  m_get_map_section_client =
-    m_nh.serviceClient<vdb_mapping_msgs::GetMapSection>("/vdb_mapping/get_map_section");
 }
 
 template <typename VDBMappingT>
@@ -202,7 +211,7 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
   {
     ROS_ERROR_STREAM("Transform from source to map frame failed: " << ex.what());
     res.success = false;
-    return false;
+    return true;
   }
 
   res.map     = gridToStr(m_vdb_map->getMapSection(req.bbox.min_x,
@@ -222,16 +231,33 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
   vdb_mapping_msgs::TriggerMapSectionUpdate::Request& req,
   vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res)
 {
+  auto remote_source = m_remote_sources.find(req.remote_source);
+  if (remote_source == m_remote_sources.end())
+  {
+    std::stringstream ss;
+    ss << "Key " << req.remote_source << " not found. Available sources are: ";
+    for (auto& source : m_remote_sources)
+    {
+      ss << source.first << ", ";
+    }
+    ROS_INFO_STREAM(ss.str());
+    res.success = false;
+    return true;
+  }
+
   vdb_mapping_msgs::GetMapSection srv;
   srv.request.header = req.header;
   srv.request.bbox   = req.bbox;
-  m_get_map_section_client.call(srv);
+  remote_source->second.get_map_section_client.call(srv);
 
-  m_vdb_map->overwriteMap(strToGrid(srv.response.map));
-  publishMap();
+  if (srv.response.success)
+  {
+    m_vdb_map->overwriteMap(strToGrid(srv.response.map));
+    publishMap();
+  }
 
   res.success = srv.response.success;
-  return res.success;
+  return true;
 }
 
 template <typename VDBMappingT>

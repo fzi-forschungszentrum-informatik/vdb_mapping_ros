@@ -53,6 +53,15 @@
 #include <dynamic_reconfigure/server.h>
 #include <vdb_mapping_ros/VDBMappingROSConfig.h>
 
+struct RemoteSource
+{
+  ros::Subscriber map_update_sub;
+  ros::Subscriber map_overwrite_sub;
+  ros::ServiceClient get_map_section_client;
+  bool apply_remote_updates;
+  bool apply_remote_overwrites;
+};
+
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
@@ -201,21 +210,6 @@ private:
   ros::Subscriber m_aligned_cloud_sub;
 
   /*!
-   * \brief Subscriber for map updates
-   */
-  ros::Subscriber m_map_update_sub;
-
-  /*!
-   * \brief Subscriber for map overwrites
-   */
-  ros::Subscriber m_map_overwrite_sub;
-
-  /*!
-   * \brief Subscriber for map section overwrites
-   */
-  ros::Subscriber m_map_section_overwrite_sub;
-
-  /*!
    * \brief Publisher for the marker array
    */
   ros::Publisher m_visualization_marker_pub;
@@ -236,11 +230,6 @@ private:
   ros::Publisher m_map_overwrite_pub;
 
   /*!
-   * \brief Publisher for map section overwrites
-   */
-  ros::Publisher m_map_section_overwrite_pub;
-
-  /*!
    * \brief Saves map in specified path from parameter server
    */
   ros::ServiceServer m_save_map_service_server;
@@ -251,8 +240,6 @@ private:
   ros::ServiceServer m_load_map_service_server;
 
   ros::ServiceServer m_get_map_section_service;
-
-  ros::ServiceClient m_get_map_section_client;
 
   ros::ServiceServer m_trigger_map_section_update_service;
 
@@ -323,25 +310,17 @@ private:
   bool m_publish_overwrites;
 
   /*!
-   * \brief Specifies whether the mapping applies updates from remote sources
+   * \brief Specifies whether the mapping applies raw sensor data
    */
-  bool m_apply_remote_updates;
-
-  /*!
-   * \brief Specifies whether the mapping applies overwrites from remote sources
-   */
-  bool m_apply_remote_overwrites;
-
-  /*!
-   * \brief Specifies whether the mapping applies map section overwrites from remote sources
-   */
-  bool m_apply_remote_sections;
-
   bool m_apply_raw_sensor_data;
   /*!
    * \brief Specifies whether the data reduction is enabled
    */
   bool m_reduce_data;
+  /*!
+   * \brief Vector of remote mapping source connections
+   */
+  std::map<std::string, RemoteSource> m_remote_sources;
 };
 
 #include "VDBMappingROS.hpp"
