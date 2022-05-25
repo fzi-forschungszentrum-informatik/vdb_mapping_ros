@@ -32,7 +32,9 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
+#include <vdb_mapping_msgs/GetMapSection.h>
 #include <vdb_mapping_msgs/LoadMap.h>
+#include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -50,6 +52,15 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <vdb_mapping_ros/VDBMappingROSConfig.h>
+
+struct RemoteSource
+{
+  ros::Subscriber map_update_sub;
+  ros::Subscriber map_overwrite_sub;
+  ros::ServiceClient get_map_section_client;
+  bool apply_remote_updates;
+  bool apply_remote_overwrites;
+};
 
 /*!
  * \brief ROS wrapper class for vdb_mapping
@@ -113,11 +124,40 @@ public:
   void publishMap() const;
 
   /*!
-   * \brief Publishes a grid update as compressed serialized string
+   * \brief Creates a compressed Bitstream as ROS msg from an input grid
    *
    * \param update Update grid
+   *
+   * \returns update msg
    */
-  void publishUpdate(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+  std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+
+  /*!
+   * \brief Creates a compressed Bitstream as string from an input grid
+   *
+   * \param update Update grid
+   *
+   * \returns bitstream
+   */
+  std::string gridToStr(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+
+  /*!
+   * \brief Unpacks an update grid from a compressed bitstream
+   *
+   * \param msg Compressed Bitstream
+   *
+   * \returns Update Grid
+   */
+  typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
+
+  /*!
+   * \brief Unpacks an update grid from a ROS msg
+   *
+   * \param msg Compressed Bitstream as ROS msg
+   *
+   * \returns Update Grid
+   */
+  typename VDBMappingT::UpdateGridT::Ptr strToGrid(const std::string& msg) const;
 
   /*!
    * \brief Listens to map updates and creats a map from these
@@ -127,11 +167,40 @@ public:
   void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
 
   /*!
+   * \brief Listens to map overwrites and creates a map from these
+   *
+   * \param update_msg Single map overwrite from a remote mapping instance
+   */
+  void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
+
+  /*!
    * \brief Returns a pointer to the map
    *
    * \returns VDB grid pointer
    */
   const typename VDBMappingT::GridT::Ptr getMap();
+
+  /*!
+   * \brief Callback for requesting parts of the map
+   *
+   * \param req Coordinates and reference of the map section
+   * \param res Result of section request, which includes the returned map
+   *
+   * \returns Result of section request
+   */
+  bool getMapSectionCallback(vdb_mapping_msgs::GetMapSection::Request& req,
+                             vdb_mapping_msgs::GetMapSection::Response& res);
+
+  /*!
+   * \brief Callback for triggering a map section request on a remote source
+   *
+   * \param req Coordinates, reference frame and remote source identifier of the map section
+   * \param res Result of triggering section request
+   *
+   * \returns Result of triggering section request
+   */
+  bool triggerMapSectionUpdateCallback(vdb_mapping_msgs::TriggerMapSectionUpdate::Request& req,
+                                       vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res);
 
   /*!
    * \brief Callback for map reset service call
@@ -169,12 +238,6 @@ private:
    */
   ros::Subscriber m_aligned_cloud_sub;
 
-
-  /*!
-   * \brief Subscriber for map updates
-   */
-  ros::Subscriber m_map_update_sub;
-
   /*!
    * \brief Publisher for the marker array
    */
@@ -186,10 +249,14 @@ private:
   ros::Publisher m_pointcloud_pub;
 
   /*!
-   * \brief Publisher map updates
+   * \brief Publisher for map updates
    */
   ros::Publisher m_map_update_pub;
 
+  /*!
+   * \brief Publisher for map overwrites
+   */
+  ros::Publisher m_map_overwrite_pub;
 
   /*!
    * \brief Saves map in specified path from parameter server
@@ -201,6 +268,15 @@ private:
    */
   ros::ServiceServer m_load_map_service_server;
 
+  /*!
+   * \brief Service for map section requests
+   */
+  ros::ServiceServer m_get_map_section_service;
+
+  /*!
+   * \brief Service for triggering the map section request on a remote source
+   */
+  ros::ServiceServer m_trigger_map_section_update_service;
 
   /*!
    * \brief Service for reset map
@@ -263,9 +339,22 @@ private:
   bool m_publish_updates;
 
   /*!
-   * \brief Specifies if the node runs in normal or remote mapping mode
+   * \brief Specifies whether the mapping publishes map overwrites for remote use
    */
-  bool m_remote_mode;
+  bool m_publish_overwrites;
+
+  /*!
+   * \brief Specifies whether the mapping applies raw sensor data
+   */
+  bool m_apply_raw_sensor_data;
+  /*!
+   * \brief Specifies whether the data reduction is enabled
+   */
+  bool m_reduce_data;
+  /*!
+   * \brief Vector of remote mapping source connections
+   */
+  std::map<std::string, RemoteSource> m_remote_sources;
 };
 
 #include "VDBMappingROS.hpp"

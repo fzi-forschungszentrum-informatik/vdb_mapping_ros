@@ -1,0 +1,5 @@
+Header header
+string remote_source
+BoundingBox bounding_box
+---
+bool success
