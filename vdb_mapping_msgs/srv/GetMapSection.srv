@@ -1,5 +1,5 @@
 Header header
-BoundingBox bbox
+BoundingBox bounding_box
 ---
 string map
 bool success

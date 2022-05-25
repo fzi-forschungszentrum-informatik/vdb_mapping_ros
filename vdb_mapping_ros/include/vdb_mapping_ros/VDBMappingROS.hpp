@@ -215,12 +215,12 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return true;
   }
 
-  res.map     = gridToStr(m_vdb_map->getMapSection(req.bbox.min_x,
-                                               req.bbox.min_y,
-                                               req.bbox.min_z,
-                                               req.bbox.max_x,
-                                               req.bbox.max_y,
-                                               req.bbox.max_z,
+  res.map     = gridToStr(m_vdb_map->getMapSection(req.bounding_box.min_corner.x,
+                                               req.bounding_box.min_corner.y,
+                                               req.bounding_box.min_corner.z,
+                                               req.bounding_box.max_corner.x,
+                                               req.bounding_box.max_corner.y,
+                                               req.bounding_box.max_corner.z,
                                                tf2::transformToEigen(source_to_map_tf).matrix()));
   res.success = true;
 
@@ -247,8 +247,8 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
   }
 
   vdb_mapping_msgs::GetMapSection srv;
-  srv.request.header = req.header;
-  srv.request.bbox   = req.bbox;
+  srv.request.header       = req.header;
+  srv.request.bounding_box = req.bounding_box;
   remote_source->second.get_map_section_client.call(srv);
 
   if (srv.response.success)
