@@ -30,8 +30,8 @@
 #include <vdb_mapping_ros/VDBMappingROS.h>
 
 template <typename VDBMappingT>
-VDBMappingROS<VDBMappingT>::VDBMappingROS()
-  : m_priv_nh("~")
+VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
+  : m_priv_nh(nh)
   , m_tf_listener(m_tf_buffer)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);

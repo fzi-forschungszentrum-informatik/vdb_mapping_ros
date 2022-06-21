@@ -71,8 +71,11 @@ class VDBMappingROS
 public:
   /*!
    * \brief Creates a new VDBMappingROS instance
+   *
+   * \param nh Node handle to use for parameters and communication
    */
-  VDBMappingROS();
+  explicit VDBMappingROS(const ros::NodeHandle& nh = ros::NodeHandle("~"));
+
   virtual ~VDBMappingROS(){};
 
   /*!
