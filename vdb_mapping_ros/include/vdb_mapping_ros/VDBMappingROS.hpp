@@ -96,7 +96,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS()
     if (remote_source.apply_remote_overwrites)
     {
       remote_source.map_overwrite_sub = m_nh.subscribe(
-        remote_namespace + "/vdb_map_overwrites", 1, &VDBMappingROS::mapUpdateCallback, this);
+        remote_namespace + "/vdb_map_overwrites", 1, &VDBMappingROS::mapOverwriteCallback, this);
     }
     remote_source.get_map_section_client =
       m_nh.serviceClient<vdb_mapping_msgs::GetMapSection>(remote_namespace + "/get_map_section");
