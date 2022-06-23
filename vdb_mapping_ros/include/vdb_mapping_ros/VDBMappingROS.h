@@ -174,11 +174,18 @@ public:
   void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
 
   /*!
-   * \brief Returns a pointer to the map
+   * \brief Returns the map
    *
-   * \returns VDB grid pointer
+   * \returns VDB map
    */
-  const typename VDBMappingT::GridT::Ptr getMap();
+  VDBMappingT& getMap();
+
+  /*!
+   * \brief Returns the map
+   *
+   * \returns VDB map
+   */
+  const VDBMappingT& getMap() const;
 
   /*!
    * \brief Callback for requesting parts of the map
