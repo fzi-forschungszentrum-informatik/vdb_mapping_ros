@@ -195,9 +195,15 @@ bool VDBMappingROS<VDBMappingT>::loadMap(vdb_mapping_msgs::LoadMap::Request& req
 }
 
 template <typename VDBMappingT>
-const typename VDBMappingT::GridT::Ptr VDBMappingROS<VDBMappingT>::getMap()
+VDBMappingT& VDBMappingROS<VDBMappingT>::getMap()
 {
-  return m_vdb_map->getMap();
+  return *m_vdb_map;
+}
+
+template <typename VDBMappingT>
+const VDBMappingT& VDBMappingROS<VDBMappingT>::getMap() const
+{
+  return *m_vdb_map;
 }
 
 template <typename VDBMappingT>
