@@ -195,6 +195,18 @@ bool VDBMappingROS<VDBMappingT>::loadMap(vdb_mapping_msgs::LoadMap::Request& req
 }
 
 template <typename VDBMappingT>
+const std::string& VDBMappingROS<VDBMappingT>::getMapFrame() const
+{
+  return m_map_frame;
+}
+
+template <typename VDBMappingT>
+const std::string& VDBMappingROS<VDBMappingT>::getSensorFrame() const
+{
+  return m_sensor_frame;
+}
+
+template <typename VDBMappingT>
 VDBMappingT& VDBMappingROS<VDBMappingT>::getMap()
 {
   return *m_vdb_map;

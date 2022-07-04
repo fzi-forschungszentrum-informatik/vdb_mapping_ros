@@ -177,6 +177,20 @@ public:
   void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
 
   /*!
+   * \brief Get the map frame name
+   *
+   * \returns Map frame name
+   */
+  const std::string& getMapFrame() const;
+
+  /*!
+   * \brief Get the frame used for raycasting scan aligned pointclouds
+   *
+   * \returns Sensor frame name
+   */
+  const std::string& getSensorFrame() const;
+
+  /*!
    * \brief Returns the map
    *
    * \returns VDB map
