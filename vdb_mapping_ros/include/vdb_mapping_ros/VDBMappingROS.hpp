@@ -65,6 +65,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   {
     ROS_WARN_STREAM("No map frame specified");
   }
+  m_vdb_map->getGrid()->insertMeta("ros/map_frame", openvdb::StringMetadata(m_map_frame));
 
   std::string raw_points_topic;
   std::string aligned_points_topic;
