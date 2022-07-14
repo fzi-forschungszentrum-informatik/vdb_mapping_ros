@@ -236,7 +236,7 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return true;
   }
 
-  res.map     = gridToStr(m_vdb_map->getMapOverwriteSection(
+  res.map     = gridToStr(m_vdb_map->getMapSectionUpdateGrid(
     Eigen::Matrix<double, 3, 1>(
       req.bounding_box.min_corner.x, req.bounding_box.min_corner.y, req.bounding_box.min_corner.z),
     Eigen::Matrix<double, 3, 1>(
