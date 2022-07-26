@@ -140,6 +140,11 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
+
+  double visualization_rate;
+  m_priv_nh.param<double>("visualization_rate", visualization_rate, 1.0);
+  m_visualization_timer = m_nh.createTimer(
+    ros::Rate(visualization_rate), &VDBMappingROS::visualizationTimerCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -270,7 +275,6 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
   if (srv.response.success)
   {
     m_vdb_map->overwriteMap(strToGrid(srv.response.map));
-    publishMap();
   }
 
   res.success = srv.response.success;
@@ -341,7 +345,6 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   {
     m_map_overwrite_pub.publish(gridToMsg(overwrite));
   }
-  publishMap();
 }
 
 template <typename VDBMappingT>
@@ -397,13 +400,19 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::Const
   {
     m_vdb_map->updateMap(m_vdb_map->raycastUpdateGrid(msgToGrid(update_msg)));
   }
-  publishMap();
 }
 
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg)
 {
   m_vdb_map->overwriteMap(msgToGrid(update_msg));
+}
+
+
+template <typename VDBMappingT>
+void VDBMappingROS<VDBMappingT>::visualizationTimerCallback(const ros::TimerEvent& event)
+{
+  (void)event;
   publishMap();
 }
 

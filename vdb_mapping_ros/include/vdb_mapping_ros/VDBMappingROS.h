@@ -231,6 +231,13 @@ public:
    */
   void dynamicReconfigureCallback(vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t);
 
+  /*!
+   * \brief Timer Callback for visualizing the entire map
+   *
+   * \param event
+   */
+  void visualizationTimerCallback(const ros::TimerEvent& event);
+
 private:
   /*!
    * \brief Public node handle
@@ -359,6 +366,11 @@ private:
    * \brief Vector of remote mapping source connections
    */
   std::map<std::string, RemoteSource> m_remote_sources;
+
+  /*!
+   * \brief Timer for map visualization
+   */
+  ros::Timer m_visualization_timer;
 
   /*!
    * \brief Specifies the lower z bound for the visualization
