@@ -55,23 +55,12 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_priv_nh.param<bool>("reduce_data", m_reduce_data, false);
 
-  m_priv_nh.param<std::string>("sensor_frame", m_sensor_frame, "");
-  if (m_sensor_frame.empty())
-  {
-    ROS_WARN_STREAM("No sensor frame specified");
-  }
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "");
   if (m_map_frame.empty())
   {
     ROS_WARN_STREAM("No map frame specified");
   }
   m_vdb_map->getGrid()->insertMeta("ros/map_frame", openvdb::StringMetadata(m_map_frame));
-
-  std::string raw_points_topic;
-  std::string aligned_points_topic;
-  m_priv_nh.param<std::string>("raw_points", raw_points_topic, "");
-  m_priv_nh.param<std::string>("aligned_points", aligned_points_topic, "");
-
 
   // Setting up remote sources
   std::vector<std::string> source_ids;
@@ -115,10 +104,23 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   if (m_apply_raw_sensor_data)
   {
-    m_sensor_cloud_sub =
-      m_nh.subscribe(raw_points_topic, 1, &VDBMappingROS::sensorCloudCallback, this);
-    m_aligned_cloud_sub =
-      m_nh.subscribe(aligned_points_topic, 1, &VDBMappingROS::alignedCloudCallback, this);
+    // Setting all aligned sources
+    m_priv_nh.param<std::vector<std::string> >("sources", source_ids, std::vector<std::string>());
+    for (auto& source_id : source_ids)
+    {
+      std::string topic_name;
+      std::string sensor_origin_frame;
+      m_priv_nh.param<std::string>(source_id + "/topic", topic_name, "");
+      m_priv_nh.param<std::string>(source_id + "/sensor_origin_frame", sensor_origin_frame, "");
+      if (topic_name.empty())
+      {
+        ROS_ERROR_STREAM("No input topic specified for source: " << source_id);
+        continue;
+      }
+
+      m_cloud_subs.push_back(m_nh.subscribe<sensor_msgs::PointCloud2>(
+        topic_name, 1, boost::bind(&VDBMappingROS::cloudCallback, this, _1, sensor_origin_frame)));
+    }
   }
 
   m_visualization_marker_pub =
@@ -202,12 +204,6 @@ const std::string& VDBMappingROS<VDBMappingT>::getMapFrame() const
 }
 
 template <typename VDBMappingT>
-const std::string& VDBMappingROS<VDBMappingT>::getSensorFrame() const
-{
-  return m_sensor_frame;
-}
-
-template <typename VDBMappingT>
 VDBMappingT& VDBMappingROS<VDBMappingT>::getMap()
 {
   return *m_vdb_map;
@@ -281,70 +277,50 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
   return true;
 }
 
+
 template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::alignedCloudCallback(
-  const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
+void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+                                               const std::string& sensor_origin_frame)
 {
   typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
-  geometry_msgs::TransformStamped sensor_to_map_tf;
+  geometry_msgs::TransformStamped cloud_origin_tf;
+
+  std::string sensor_frame =
+    sensor_origin_frame.empty() ? cloud_msg->header.frame_id : sensor_origin_frame;
+
+  // Get the origin of the sensor used as a starting point of the ray cast
   try
   {
-    // Get sensor origin transform in map coordinates
-    sensor_to_map_tf =
-      m_tf_buffer.lookupTransform(m_map_frame, m_sensor_frame, cloud_msg->header.stamp);
+    cloud_origin_tf =
+      m_tf_buffer.lookupTransform(m_map_frame, sensor_frame, cloud_msg->header.stamp);
   }
-  catch (tf::TransformException& ex)
+  catch (tf2::TransformException& ex)
   {
-    ROS_ERROR_STREAM("Transform to map frame failed: " << ex.what());
+    ROS_ERROR_STREAM("Transform from " << sensor_frame << " to " << m_map_frame
+                                       << " frame failed:" << ex.what());
     return;
   }
 
-  // If aligned map is not already in correct map frame, transform it
+  // Transform the input pointcloud to the correct map frame
   if (m_map_frame != cloud_msg->header.frame_id)
   {
-    geometry_msgs::TransformStamped map_to_map_tf;
+    geometry_msgs::TransformStamped tf_to_map_frame;
     try
     {
-      map_to_map_tf = m_tf_buffer.lookupTransform(
+      tf_to_map_frame = m_tf_buffer.lookupTransform(
         m_map_frame, cloud_msg->header.frame_id, cloud_msg->header.stamp);
     }
     catch (tf::TransformException& ex)
     {
-      ROS_ERROR_STREAM("Transform to map frame failed: " << ex.what());
+      ROS_ERROR_STREAM("Transform from " << cloud_msg->header.frame_id << " to " << m_map_frame
+                                         << " frame failed:" << ex.what());
       return;
     }
-    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(map_to_map_tf).matrix());
+    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(tf_to_map_frame).matrix());
     cloud->header.frame_id = m_map_frame;
   }
-
-  insertPointCloud(cloud, sensor_to_map_tf);
-}
-
-template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::sensorCloudCallback(
-  const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
-{
-  typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
-  pcl::fromROSMsg(*cloud_msg, *cloud);
-
-  geometry_msgs::TransformStamped sensor_to_map_tf;
-  try
-  {
-    // Get sensor origin transform in map coordinates
-    sensor_to_map_tf =
-      m_tf_buffer.lookupTransform(m_map_frame, cloud_msg->header.frame_id, cloud_msg->header.stamp);
-  }
-  catch (tf2::TransformException& ex)
-  {
-    ROS_ERROR_STREAM("Transform to map frame failed:" << ex.what());
-    return;
-  }
-  // Transform pointcloud into map reference system
-  pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(sensor_to_map_tf).matrix());
-  cloud->header.frame_id = m_map_frame;
-
-  insertPointCloud(cloud, sensor_to_map_tf);
+  insertPointCloud(cloud, cloud_origin_tf);
 }
 
 template <typename VDBMappingT>

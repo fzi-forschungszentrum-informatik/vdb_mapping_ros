@@ -94,21 +94,18 @@ public:
    */
   bool loadMap(vdb_mapping_msgs::LoadMap::Request& req, vdb_mapping_msgs::LoadMap::Response& res);
 
-  /*!
-   * \brief Sensor callback for scan aligned Pointclouds
-   * In contrast to the normal sensor callback here an additional sensor frame has to be specified
-   * as origin of the raycasting
-   *
-   * \param msg PointCloud message
-   */
-  void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
   /*!
-   * \brief Sensor callback for raw pointclouds. All data will be transformed into the map frame.
+   * \brief Sensor callback for Pointclouds
    *
-   * \param msg
+   * If the sensor_origin_frame is not empty it will be used instead of the frame id
+   * of the input cloud as origin of the raycasting
+   *
+   * \param cloud_msg PointCloud message
+   * \param sensor_origin_frame frame of the raycasting origin
    */
-  void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+  void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+                     const std::string& sensor_origin_frame);
 
   /*!
    * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library
@@ -184,13 +181,6 @@ public:
   const std::string& getMapFrame() const;
 
   /*!
-   * \brief Get the frame used for raycasting scan aligned pointclouds
-   *
-   * \returns Sensor frame name
-   */
-  const std::string& getSensorFrame() const;
-
-  /*!
    * \brief Returns the map
    *
    * \returns VDB map
@@ -253,14 +243,9 @@ private:
   ros::NodeHandle m_priv_nh;
 
   /*!
-   * \brief Subscriber for raw pointclouds
+   * \brief Subscriber vector for pointclouds
    */
-  ros::Subscriber m_sensor_cloud_sub;
-
-  /*!
-   * \brief Subscriber for scan aligned pointclouds
-   */
-  ros::Subscriber m_aligned_cloud_sub;
+  std::vector<ros::Subscriber> m_cloud_subs;
 
   /*!
    * \brief Publisher for the marker array
@@ -326,11 +311,6 @@ private:
    * \brief Grid cell resolution
    */
   double m_resolution;
-
-  /*!
-   * \brief Sensor frame used for raycasting of scan aligned pointclouds
-   */
-  std::string m_sensor_frame;
 
   /*!
    * \brief Map Frame
