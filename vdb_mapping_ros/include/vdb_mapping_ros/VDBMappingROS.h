@@ -34,6 +34,7 @@
 #include <std_srvs/Trigger.h>
 #include <vdb_mapping_msgs/GetMapSection.h>
 #include <vdb_mapping_msgs/LoadMap.h>
+#include <vdb_mapping_msgs/Raytrace.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <visualization_msgs/Marker.h>
 
@@ -219,10 +220,23 @@ public:
   /*!
    * \brief Callback for map reset service call
    *
+   * \param req request of the map reset
    * \param res result of the map reset
    * \returns result of map reset
    */
-  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
+  bool mapResetCallback(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res);
+
+  /*!
+   * \brief Callback for raytrace service call
+   *
+   * \param req Origin and direction for raytracing
+   * \param res Resulting point of the raytrace
+   *
+   * \returns result of raytrace service
+   */
+  bool raytraceCallback(vdb_mapping_msgs::Raytrace::Request& req,
+                        vdb_mapping_msgs::Raytrace::Response& res);
+
 
   /*!
    * \brief Callback for dynamic reconfigure of parameters
@@ -298,6 +312,11 @@ private:
    * \brief Service for reset map
    */
   ros::ServiceServer m_map_reset_service;
+
+  /*!
+   * \brief Service for raytracing
+   */
+  ros::ServiceServer m_raytrace_service;
 
   /*!
    * \brief Service for dynamic reconfigure of parameters

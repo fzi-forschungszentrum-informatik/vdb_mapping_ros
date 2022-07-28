@@ -140,6 +140,9 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_map_reset_service =
     m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
 
+  m_raytrace_service =
+    m_priv_nh.advertiseService("raytrace", &VDBMappingROS::raytraceCallback, this);
+
   m_dynamic_reconfigure_service.setCallback(
     boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 
@@ -180,6 +183,44 @@ bool VDBMappingROS<VDBMappingT>::mapResetCallback(std_srvs::TriggerRequest&,
   resetMap();
   res.success = true;
   res.message = "Reset map successful.";
+  return true;
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::raytraceCallback(vdb_mapping_msgs::Raytrace::Request& req,
+                                                  vdb_mapping_msgs::Raytrace::Response& res)
+{
+  geometry_msgs::TransformStamped reference_tf;
+  try
+  {
+    reference_tf = m_tf_buffer.lookupTransform(m_map_frame, req.header.frame_id, req.header.stamp);
+
+    Eigen::Matrix<double, 4, 4> m = tf2::transformToEigen(reference_tf).matrix();
+    Eigen::Matrix<double, 4, 1> origin, direction;
+    origin << req.origin.x, req.origin.y, req.origin.z, 1;
+    direction << req.direction.x, req.direction.y, req.direction.z, 0;
+
+    origin    = m * origin;
+    direction = m * direction;
+
+    openvdb::Vec3d trace;
+
+    res.success = m_vdb_map->raytrace(openvdb::Vec3d(origin.x(), origin.y(), origin.z()),
+                                      openvdb::Vec3d(direction.x(), direction.y(), direction.z()),
+                                      req.max_ray_length,
+                                      trace);
+
+    res.header.frame_id = m_map_frame;
+    res.header.stamp    = req.header.stamp;
+    res.trace.x         = trace.x();
+    res.trace.y         = trace.y();
+    res.trace.z         = trace.z();
+  }
+  catch (tf2::TransformException& ex)
+  {
+    ROS_ERROR_STREAM("Transform to map frame failed:" << ex.what());
+    res.success = false;
+  }
   return true;
 }
 
