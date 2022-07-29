@@ -296,8 +296,8 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
   // Get the origin of the sensor used as a starting point of the ray cast
   try
   {
-    cloud_origin_tf =
-      m_tf_buffer.lookupTransform(m_map_frame, sensor_frame, cloud_msg->header.stamp);
+    cloud_origin_tf = m_tf_buffer.lookupTransform(
+      m_map_frame, sensor_frame, cloud_msg->header.stamp, ros::Duration(0.1));
   }
   catch (tf2::TransformException& ex)
   {
