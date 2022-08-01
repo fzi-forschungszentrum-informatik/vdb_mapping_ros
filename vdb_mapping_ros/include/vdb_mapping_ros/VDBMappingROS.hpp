@@ -203,18 +203,18 @@ bool VDBMappingROS<VDBMappingT>::raytraceCallback(vdb_mapping_msgs::Raytrace::Re
     origin    = m * origin;
     direction = m * direction;
 
-    openvdb::Vec3d trace;
+    openvdb::Vec3d end_point;
 
     res.success = m_vdb_map->raytrace(openvdb::Vec3d(origin.x(), origin.y(), origin.z()),
                                       openvdb::Vec3d(direction.x(), direction.y(), direction.z()),
                                       req.max_ray_length,
-                                      trace);
+                                      end_point);
 
     res.header.frame_id = m_map_frame;
     res.header.stamp    = req.header.stamp;
-    res.trace.x         = trace.x();
-    res.trace.y         = trace.y();
-    res.trace.z         = trace.z();
+    res.end_point.x         = end_point.x();
+    res.end_point.y         = end_point.y();
+    res.end_point.z         = end_point.z();
   }
   catch (tf2::TransformException& ex)
   {
