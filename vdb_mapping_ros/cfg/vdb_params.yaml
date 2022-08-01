@@ -12,6 +12,7 @@ publish_overwrites: true
 apply_raw_sensor_data: true
 reduce_data: false
 map_save_dir: ""
+visualization_rate: 2
 
 sources: [velodyne, front, rear, left, right]
 velodyne:
