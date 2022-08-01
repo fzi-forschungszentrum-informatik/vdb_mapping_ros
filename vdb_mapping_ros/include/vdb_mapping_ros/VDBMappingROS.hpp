@@ -319,10 +319,10 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
   // Transform the input pointcloud to the correct map frame
   if (m_map_frame != cloud_msg->header.frame_id)
   {
-    geometry_msgs::TransformStamped tf_to_map_frame;
+    geometry_msgs::TransformStamped origin_to_map_tf;
     try
     {
-      tf_to_map_frame = m_tf_buffer.lookupTransform(
+      origin_to_map_tf = m_tf_buffer.lookupTransform(
         m_map_frame, cloud_msg->header.frame_id, cloud_msg->header.stamp);
     }
     catch (tf::TransformException& ex)
@@ -331,7 +331,7 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
                                          << " frame failed:" << ex.what());
       return;
     }
-    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(tf_to_map_frame).matrix());
+    pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(origin_to_map_tf).matrix());
     cloud->header.frame_id = m_map_frame;
   }
   insertPointCloud(cloud, cloud_origin_tf);
