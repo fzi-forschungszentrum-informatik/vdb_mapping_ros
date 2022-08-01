@@ -112,10 +112,20 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
       std::string sensor_origin_frame;
       m_priv_nh.param<std::string>(source_id + "/topic", topic_name, "");
       m_priv_nh.param<std::string>(source_id + "/sensor_origin_frame", sensor_origin_frame, "");
+      ROS_INFO_STREAM("Setting up source: " << source_id);
       if (topic_name.empty())
       {
         ROS_ERROR_STREAM("No input topic specified for source: " << source_id);
         continue;
+      }
+      ROS_INFO_STREAM("Topic: " << topic_name);
+      if (sensor_origin_frame.empty())
+      {
+        ROS_INFO_STREAM("Using frame_id of topic as raycast origin");
+      }
+      else
+      {
+        ROS_INFO_STREAM("Using " << sensor_origin_frame << " as raycast origin");
       }
 
       m_cloud_subs.push_back(m_nh.subscribe<sensor_msgs::PointCloud2>(
