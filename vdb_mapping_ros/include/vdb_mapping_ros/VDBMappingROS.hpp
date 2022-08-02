@@ -212,9 +212,9 @@ bool VDBMappingROS<VDBMappingT>::raytraceCallback(vdb_mapping_msgs::Raytrace::Re
 
     res.header.frame_id = m_map_frame;
     res.header.stamp    = req.header.stamp;
-    res.end_point.x         = end_point.x();
-    res.end_point.y         = end_point.y();
-    res.end_point.z         = end_point.z();
+    res.end_point.x     = end_point.x();
+    res.end_point.y     = end_point.y();
+    res.end_point.z     = end_point.z();
   }
   catch (tf2::TransformException& ex)
   {
