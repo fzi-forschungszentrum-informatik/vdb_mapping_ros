@@ -58,6 +58,7 @@ add_service_files(
   GetMapSection.srv
   LoadMap.srv
   TriggerMapSectionUpdate.srv
+  Raytrace.srv
 )
 
 ## Generate actions in the 'action' folder
