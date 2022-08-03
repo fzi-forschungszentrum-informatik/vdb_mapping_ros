@@ -140,7 +140,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
   m_occupancy_grid_service =
-    m_priv_nh.advertiseService("occupancy_grid", &VDBMappingROS::occGridGenCallback, this);
+    m_priv_nh.advertiseService("get_occupancy_grid", &VDBMappingROS::occGridGenCallback, this);
 }
 
 template <typename VDBMappingT>
