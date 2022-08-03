@@ -139,7 +139,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
-  m_occ_grid_service = m_priv_nh.advertiseService("occ_grid", &VDBMappingROS::occGridGenCallback, this);
+  m_occ_grid_service =
+    m_priv_nh.advertiseService("occ_grid", &VDBMappingROS::occGridGenCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -285,60 +286,64 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
 }
 
 template <typename VDBMappingT>
-bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req , 
-vdb_mapping_msgs::GetOccGrid::Response& res)
+bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+                                                    vdb_mapping_msgs::GetOccGrid::Response& res)
 {
-  if(req.req_occ_grid)
+  if (req.req_occ_grid)
   {
-  nav_msgs::OccupancyGrid grid_;
-  openvdb::CoordBBox curr_bbox_ =  m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
-  grid_.header.frame_id = m_map_frame;
-  grid_.header.stamp = ros::Time::now();
-  grid_.info.height = curr_bbox_.dim().y();
-  grid_.info.width = curr_bbox_.dim().x();
-  grid_.info.resolution = m_resolution;
-  std::vector<int> dummy_grid;
-  grid_.data.resize(grid_.info.width * grid_.info.height);
-  dummy_grid.resize(grid_.info.width * grid_.info.height);
+    nav_msgs::OccupancyGrid grid_;
+    openvdb::CoordBBox curr_bbox_ = m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
+    grid_.header.frame_id         = m_map_frame;
+    grid_.header.stamp            = ros::Time::now();
+    grid_.info.height             = curr_bbox_.dim().y();
+    grid_.info.width              = curr_bbox_.dim().x();
+    grid_.info.resolution         = m_resolution;
+    std::vector<int> dummy_grid;
+    grid_.data.resize(grid_.info.width * grid_.info.height);
+    dummy_grid.resize(grid_.info.width * grid_.info.height);
 
-  int x_offset = abs(curr_bbox_.min().x());
-  int y_offset = abs(curr_bbox_.min().y());
+    int x_offset = abs(curr_bbox_.min().x());
+    int y_offset = abs(curr_bbox_.min().y());
 
-  geometry_msgs::Pose origin_pose;
-  origin_pose.position.x = curr_bbox_.min().x() * m_resolution;
-  origin_pose.position.y = curr_bbox_.min().y() * m_resolution;
-  origin_pose.position.z = 0.00;
+    geometry_msgs::Pose origin_pose;
+    origin_pose.position.x = curr_bbox_.min().x() * m_resolution;
+    origin_pose.position.y = curr_bbox_.min().y() * m_resolution;
+    origin_pose.position.z = 0.00;
 
-  grid_.info.origin = origin_pose;
-  int j = 0;
-  for (openvdb::FloatGrid::ValueOnCIter iter =  m_vdb_map->getGrid()->cbeginValueOn();
-       iter; ++iter) {
-
-    if (iter.isValueOn()) {
-      j = (iter.getCoord().y() + y_offset) * curr_bbox_.dim().x() + (iter.getCoord().x() + x_offset);
-      dummy_grid[j] += 1;
-    }
-  }
-
-  for (unsigned int i = 0; i < dummy_grid.size(); i++) {
-    if (dummy_grid[i] > m_number_of_voxels) {
-      grid_.data[i] = 100;
-    }
-    else if(dummy_grid[i] == 0)
+    grid_.info.origin = origin_pose;
+    int j             = 0;
+    for (openvdb::FloatGrid::ValueOnCIter iter = m_vdb_map->getGrid()->cbeginValueOn(); iter;
+         ++iter)
     {
-      grid_.data[i] = -1;
+      if (iter.isValueOn())
+      {
+        j = (iter.getCoord().y() + y_offset) * curr_bbox_.dim().x() +
+            (iter.getCoord().x() + x_offset);
+        dummy_grid[j] += 1;
+      }
     }
-    else
-    {
-      grid_.data[i] = 0;
-    }
-  }
-  res.occ_grid = grid_;
-  res.offset_x = x_offset;
-  res.offset_y = y_offset;
 
-  
-  return true;
+    for (unsigned int i = 0; i < dummy_grid.size(); i++)
+    {
+      if (dummy_grid[i] > m_number_of_voxels)
+      {
+        grid_.data[i] = 100;
+      }
+      else if (dummy_grid[i] == 0)
+      {
+        grid_.data[i] = -1;
+      }
+      else
+      {
+        grid_.data[i] = 0;
+      }
+    }
+    res.occ_grid = grid_;
+    res.offset_x = x_offset;
+    res.offset_y = y_offset;
+
+
+    return true;
   }
   return false;
 }

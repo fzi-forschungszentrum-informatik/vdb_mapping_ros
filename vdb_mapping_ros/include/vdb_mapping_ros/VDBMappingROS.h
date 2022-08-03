@@ -33,9 +33,9 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 #include <vdb_mapping_msgs/GetMapSection.h>
+#include <vdb_mapping_msgs/GetOccGrid.h>
 #include <vdb_mapping_msgs/LoadMap.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
-#include <vdb_mapping_msgs/GetOccGrid.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -233,9 +233,10 @@ public:
    * \param res result of the map reset
    * \returns result of map reset
    */
-  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req , vdb_mapping_msgs::GetOccGrid::Response& res);
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+                          vdb_mapping_msgs::GetOccGrid::Response& res);
 
-    /*!
+  /*!
    * \brief Callback for occupancy grid service call
    *
    * \param res current occupancy grid
