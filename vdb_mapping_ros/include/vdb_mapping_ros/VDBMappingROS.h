@@ -35,6 +35,7 @@
 #include <vdb_mapping_msgs/GetMapSection.h>
 #include <vdb_mapping_msgs/LoadMap.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
+#include <vdb_mapping_msgs/GetOccGrid.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -232,6 +233,14 @@ public:
    * \param res result of the map reset
    * \returns result of map reset
    */
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req , vdb_mapping_msgs::GetOccGrid::Response& res);
+
+    /*!
+   * \brief Callback for occupancy grid service call
+   *
+   * \param res current occupancy grid
+   * \returns current occupancy grid
+   */
   bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
 
   /*!
@@ -306,6 +315,11 @@ private:
    * \brief Service for reset map
    */
   ros::ServiceServer m_map_reset_service;
+
+  /*!
+   * \brief Service to request an occupancy grid based on the current VDB map
+   */
+  ros::ServiceServer m_occ_grid_service;
 
   /*!
    * \brief Service for dynamic reconfigure of parameters
@@ -389,6 +403,11 @@ private:
    * \brief Specifies the upper z bound for the visualization
    */
   double m_upper_visualization_z_limit;
+
+  /*!
+   * \brief Specifies the number of voxels which count as occupied for the occupancy grid
+   */
+  int m_number_of_voxels;
 };
 
 #include "VDBMappingROS.hpp"
