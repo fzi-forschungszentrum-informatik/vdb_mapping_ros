@@ -339,8 +339,6 @@ bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid
       }
     }
     res.occupancy_grid = grid_;
-    res.offset_x = x_offset;
-    res.offset_y = y_offset;
 
 
     return true;
