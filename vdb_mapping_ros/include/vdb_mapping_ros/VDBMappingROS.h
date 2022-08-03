@@ -320,7 +320,7 @@ private:
   /*!
    * \brief Service to request an occupancy grid based on the current VDB map
    */
-  ros::ServiceServer m_occ_grid_service;
+  ros::ServiceServer m_occupancy_grid_service;
 
   /*!
    * \brief Service for dynamic reconfigure of parameters

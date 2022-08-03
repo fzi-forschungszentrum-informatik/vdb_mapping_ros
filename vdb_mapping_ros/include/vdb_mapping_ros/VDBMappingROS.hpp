@@ -139,8 +139,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
-  m_occ_grid_service =
-    m_priv_nh.advertiseService("occ_grid", &VDBMappingROS::occGridGenCallback, this);
+  m_occupancy_grid_service =
+    m_priv_nh.advertiseService("occupancy_grid", &VDBMappingROS::occGridGenCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -338,7 +338,7 @@ bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid
         grid_.data[i] = 0;
       }
     }
-    res.occ_grid = grid_;
+    res.occupancy_grid = grid_;
     res.offset_x = x_offset;
     res.offset_y = y_offset;
 
