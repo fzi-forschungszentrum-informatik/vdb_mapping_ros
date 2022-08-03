@@ -1,0 +1,5 @@
+bool req_occ_grid
+---
+nav_msgs/OccupancyGrid occ_grid
+uint32 offset_x
+uint32 offset_y
