@@ -95,11 +95,13 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   if (m_publish_updates)
   {
-    m_map_update_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_updates", 1, true);
+    m_map_update_pub =
+      m_priv_nh.advertise<vdb_mapping_msgs::UpdateGrid>("vdb_map_updates", 1, true);
   }
   if (m_publish_overwrites)
   {
-    m_map_overwrite_pub = m_priv_nh.advertise<std_msgs::String>("vdb_map_overwrites", 1, true);
+    m_map_overwrite_pub =
+      m_priv_nh.advertise<vdb_mapping_msgs::UpdateGrid>("vdb_map_overwrites", 1, true);
   }
 
   if (m_apply_raw_sensor_data)
@@ -399,11 +401,11 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
 }
 
 template <typename VDBMappingT>
-std_msgs::String
+vdb_mapping_msgs::UpdateGrid
 VDBMappingROS<VDBMappingT>::gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const
 {
-  std_msgs::String msg;
-  msg.data = gridToStr(update);
+  vdb_mapping_msgs::UpdateGrid msg;
+  msg.map = gridToStr(update);
   return msg;
 }
 
@@ -420,9 +422,9 @@ VDBMappingROS<VDBMappingT>::gridToStr(const typename VDBMappingT::UpdateGridT::P
 
 template <typename VDBMappingT>
 typename VDBMappingT::UpdateGridT::Ptr
-VDBMappingROS<VDBMappingT>::msgToGrid(const std_msgs::String::ConstPtr& msg) const
+VDBMappingROS<VDBMappingT>::msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const
 {
-  return strToGrid(msg->data);
+  return strToGrid(msg->map);
 }
 
 template <typename VDBMappingT>

@@ -36,6 +36,7 @@
 #include <vdb_mapping_msgs/LoadMap.h>
 #include <vdb_mapping_msgs/Raytrace.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
+#include <vdb_mapping_msgs/UpdateGrid.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -131,7 +132,7 @@ public:
    *
    * \returns update msg
    */
-  std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+  vdb_mapping_msgs::UpdateGrid gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
    * \brief Creates a compressed Bitstream as string from an input grid
@@ -149,7 +150,8 @@ public:
    *
    * \returns Update Grid
    */
-  typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
+  typename VDBMappingT::UpdateGridT::Ptr
+  msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const;
 
   /*!
    * \brief Unpacks an update grid from a ROS msg
@@ -165,14 +167,14 @@ public:
    *
    * \param update_msg Single map update from a remote mapping instance
    */
-  void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapUpdateCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Listens to map overwrites and creates a map from these
    *
    * \param update_msg Single map overwrite from a remote mapping instance
    */
-  void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapOverwriteCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Get the map frame name
