@@ -253,6 +253,7 @@ public:
    * \param event
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
+  void updateTimerCallback(const ros::TimerEvent& event);
 
 private:
   /*!
@@ -392,6 +393,7 @@ private:
    * \brief Timer for map visualization
    */
   ros::Timer m_visualization_timer;
+  ros::Timer m_update_timer;
 
   /*!
    * \brief Specifies the lower z bound for the visualization

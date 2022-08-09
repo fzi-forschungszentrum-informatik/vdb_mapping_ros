@@ -160,6 +160,11 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<double>("visualization_rate", visualization_rate, 1.0);
   m_visualization_timer = m_nh.createTimer(
     ros::Rate(visualization_rate), &VDBMappingROS::visualizationTimerCallback, this);
+
+  double update_rate;
+  m_priv_nh.param<double>("update_rate", update_rate, 10);
+  m_update_timer =
+    m_nh.createTimer(ros::Rate(update_rate), &VDBMappingROS::updateTimerCallback, this);
 }
 
 template <typename VDBMappingT>
@@ -377,7 +382,9 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
     pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(origin_to_map_tf).matrix());
     cloud->header.frame_id = m_map_frame;
   }
-  insertPointCloud(cloud, cloud_origin_tf);
+  // insertPointCloud(cloud, cloud_origin_tf);
+  //
+  m_vdb_map->accumulateUpdate(cloud, tf2::transformToEigen(cloud_origin_tf).translation());
 }
 
 template <typename VDBMappingT>
@@ -484,6 +491,34 @@ void VDBMappingROS<VDBMappingT>::visualizationTimerCallback(const ros::TimerEven
 {
   (void)event;
   publishMap();
+}
+
+template <typename VDBMappingT>
+void VDBMappingROS<VDBMappingT>::updateTimerCallback(const ros::TimerEvent& event)
+{
+  static unsigned int sequence_number = 0;
+  typename VDBMappingT::UpdateGridT::Ptr update;
+  typename VDBMappingT::UpdateGridT::Ptr overwrite;
+  m_vdb_map->integrateUpdate(update, overwrite);
+
+  std_msgs::Header header;
+  header.frame_id = m_map_frame;
+  header.stamp    = event.current_real;
+  header.seq      = sequence_number++;
+
+  if (m_publish_updates)
+  {
+    vdb_mapping_msgs::UpdateGrid msg = gridToMsg(update);
+    msg.header                       = header;
+    m_map_update_pub.publish(msg);
+  }
+  if (m_publish_overwrites)
+  {
+    vdb_mapping_msgs::UpdateGrid msg = gridToMsg(overwrite);
+    msg.header                       = header;
+    m_map_overwrite_pub.publish(msg);
+  }
+  m_vdb_map->resetUpdate();
 }
 
 template <typename VDBMappingT>
