@@ -443,8 +443,17 @@ VDBMappingROS<VDBMappingT>::strToGrid(const std::string& msg) const
 }
 
 template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg)
+void VDBMappingROS<VDBMappingT>::mapUpdateCallback(
+  const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg)
 {
+  static unsigned int sequence_number = 0;
+  if (sequence_number != update_msg->header.seq)
+  {
+    ROS_WARN_STREAM("Missed an update");
+    sequence_number = update_msg->header.seq;
+  }
+  sequence_number++;
+
   if (!m_reduce_data)
   {
     m_vdb_map->updateMap(msgToGrid(update_msg));
@@ -456,8 +465,16 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(const std_msgs::String::Const
 }
 
 template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg)
+void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(
+  const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg)
 {
+  static unsigned int sequence_number = 0;
+  if (sequence_number != update_msg->header.seq)
+  {
+    ROS_WARN_STREAM("Missed an overwrite");
+    sequence_number = update_msg->header.seq;
+  }
+  sequence_number++;
   m_vdb_map->overwriteMap(msgToGrid(update_msg));
 }
 
@@ -469,6 +486,7 @@ void VDBMappingROS<VDBMappingT>::visualizationTimerCallback(const ros::TimerEven
   publishMap();
 }
 
+template <typename VDBMappingT>
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::publishMap() const
 {
