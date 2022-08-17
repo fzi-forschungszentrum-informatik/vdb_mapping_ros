@@ -59,9 +59,11 @@ struct RemoteSource
 {
   ros::Subscriber map_update_sub;
   ros::Subscriber map_overwrite_sub;
+  ros::Subscriber map_section_sub;
   ros::ServiceClient get_map_section_client;
   bool apply_remote_updates;
   bool apply_remote_overwrites;
+  bool apply_remote_sections;
 };
 
 /*!
@@ -179,6 +181,7 @@ public:
    * \param update_msg Single map overwrite from a remote mapping instance
    */
   void mapOverwriteCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
+  void mapSectionCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Get the map frame name
@@ -258,6 +261,7 @@ public:
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
   void updateTimerCallback(const ros::TimerEvent& event);
+  void sectionTimerCallback(const ros::TimerEvent& event);
 
 private:
   /*!
@@ -294,6 +298,8 @@ private:
    * \brief Publisher for map overwrites
    */
   ros::Publisher m_map_overwrite_pub;
+
+  ros::Publisher m_map_section_pub;
 
   /*!
    * \brief Saves map in specified path from parameter server
@@ -380,6 +386,8 @@ private:
    */
   bool m_publish_overwrites;
 
+  bool m_publish_sections;
+
   /*!
    * \brief Specifies whether the mapping applies raw sensor data
    */
@@ -399,6 +407,7 @@ private:
   ros::Timer m_visualization_timer;
   bool m_accumulate_updates;
   ros::Timer m_update_timer;
+  ros::Timer m_section_timer;
 
 
   /*!

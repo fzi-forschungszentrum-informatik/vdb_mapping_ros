@@ -1,4 +1,5 @@
 map_frame: map
+robot_frame: base_link
 max_range: 10.0
 resolution: 0.07
 prob_hit: 0.99
@@ -9,12 +10,14 @@ publish_pointcloud: true
 publish_vis_marker: true
 publish_updates: true
 publish_overwrites: true
+publish_sections: true
 apply_raw_sensor_data: true
 reduce_data: false
 map_save_dir: ""
 visualization_rate: 2
 accumulate_updates: true
 accumulation_period: 0.2
+section_update_rate: 1
 
 sources: [velodyne, front, rear, left, right]
 velodyne:
