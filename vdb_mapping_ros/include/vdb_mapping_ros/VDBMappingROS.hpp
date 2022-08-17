@@ -487,7 +487,6 @@ void VDBMappingROS<VDBMappingT>::visualizationTimerCallback(const ros::TimerEven
 }
 
 template <typename VDBMappingT>
-template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::publishMap() const
 {
   if (!(m_publish_pointcloud || m_publish_vis_marker))
