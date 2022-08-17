@@ -13,7 +13,8 @@ apply_raw_sensor_data: true
 reduce_data: false
 map_save_dir: ""
 visualization_rate: 2
-update_rate: 5
+accumulate_updates: true
+accumulation_period: 0.2
 
 sources: [velodyne, front, rear, left, right]
 velodyne:

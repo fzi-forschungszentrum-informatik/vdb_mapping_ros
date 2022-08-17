@@ -125,6 +125,10 @@ public:
    */
   void publishMap() const;
 
+  void publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
+                      typename VDBMappingT::UpdateGridT::Ptr overwrite,
+                      ros::Time stamp);
+
   /*!
    * \brief Creates a compressed Bitstream as ROS msg from an input grid
    *
@@ -393,7 +397,9 @@ private:
    * \brief Timer for map visualization
    */
   ros::Timer m_visualization_timer;
+  bool m_accumulate_updates;
   ros::Timer m_update_timer;
+
 
   /*!
    * \brief Specifies the lower z bound for the visualization
