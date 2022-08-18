@@ -62,6 +62,12 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
     ROS_WARN_STREAM("No map frame specified");
   }
   m_vdb_map->getGrid()->insertMeta("ros/map_frame", openvdb::StringMetadata(m_map_frame));
+  m_priv_nh.param<std::string>("robot_frame", m_robot_frame, "");
+  if (m_robot_frame.empty())
+  {
+    ROS_WARN_STREAM("No map frame specified");
+  }
+
 
   // Setting up remote sources
   std::vector<std::string> source_ids;
@@ -634,7 +640,7 @@ void VDBMappingROS<VDBMappingT>::sectionTimerCallback(const ros::TimerEvent& eve
   try
   {
     map_to_robot_tf =
-      m_tf_buffer.lookupTransform(m_map_frame, "base_link", ros::Time(0), ros::Duration(1.0));
+      m_tf_buffer.lookupTransform(m_map_frame, m_robot_frame, ros::Time(0), ros::Duration(1.0));
   }
   catch (tf::TransformException& ex)
   {
@@ -642,8 +648,8 @@ void VDBMappingROS<VDBMappingT>::sectionTimerCallback(const ros::TimerEvent& eve
   }
 
   typename VDBMappingT::UpdateGridT::Ptr section =
-    m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-10, -10, -10),
-                                       Eigen::Matrix<double, 3, 1>(10, 10, 10),
+    m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-2, -2, -2),
+                                       Eigen::Matrix<double, 3, 1>(2, 2, 2),
                                        tf2::transformToEigen(map_to_robot_tf).matrix());
 
   vdb_mapping_msgs::UpdateGrid msg;

@@ -355,6 +355,7 @@ private:
    * \brief Map Frame
    */
   std::string m_map_frame;
+  std::string m_robot_frame;
 
   /*!
    * \brief Map pointer
