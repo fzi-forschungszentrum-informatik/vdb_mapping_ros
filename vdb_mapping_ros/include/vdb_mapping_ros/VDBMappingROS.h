@@ -228,23 +228,22 @@ public:
                                        vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res);
 
   /*!
+   * \brief Callback for occupancy grid service call
+   *
+   * \param res current occupancy grid
+   * \returns current occupancy grid
+   */
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+                          vdb_mapping_msgs::GetOccGrid::Response& res);
+
+  /*!
    * \brief Callback for map reset service call
    *
    * \param req request of the map reset
    * \param res result of the map reset
    * \returns result of map reset
    */
-  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
-                          vdb_mapping_msgs::GetOccGrid::Response& res);
-
-  /*!
-   * \brief Callback for occupancy grid service call
-   *
-   * \param res current occupancy grid
-   * \returns current occupancy grid
-   */
-
-  bool mapResetCallback(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res);
+  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
 
   /*!
    * \brief Callback for raytrace service call
@@ -338,15 +337,14 @@ private:
   ros::ServiceServer m_map_reset_service;
 
   /*!
-<<<<<<< HEAD
    * \brief Service to request an occupancy grid based on the current VDB map
    */
   ros::ServiceServer m_occupancy_grid_service;
-=======
+  
+  /*!
    * \brief Service for raytracing
    */
   ros::ServiceServer m_raytrace_service;
->>>>>>> upstream/esasrc
 
   /*!
    * \brief Service for dynamic reconfigure of parameters
