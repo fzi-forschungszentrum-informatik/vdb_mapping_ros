@@ -35,7 +35,9 @@
 #include <vdb_mapping_msgs/GetMapSection.h>
 #include <vdb_mapping_msgs/GetOccGrid.h>
 #include <vdb_mapping_msgs/LoadMap.h>
+#include <vdb_mapping_msgs/Raytrace.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
+#include <vdb_mapping_msgs/UpdateGrid.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -58,9 +60,11 @@ struct RemoteSource
 {
   ros::Subscriber map_update_sub;
   ros::Subscriber map_overwrite_sub;
+  ros::Subscriber map_section_sub;
   ros::ServiceClient get_map_section_client;
   bool apply_remote_updates;
   bool apply_remote_overwrites;
+  bool apply_remote_sections;
 };
 
 /*!
@@ -95,21 +99,18 @@ public:
    */
   bool loadMap(vdb_mapping_msgs::LoadMap::Request& req, vdb_mapping_msgs::LoadMap::Response& res);
 
-  /*!
-   * \brief Sensor callback for scan aligned Pointclouds
-   * In contrast to the normal sensor callback here an additional sensor frame has to be specified
-   * as origin of the raycasting
-   *
-   * \param msg PointCloud message
-   */
-  void alignedCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
   /*!
-   * \brief Sensor callback for raw pointclouds. All data will be transformed into the map frame.
+   * \brief Sensor callback for Pointclouds
    *
-   * \param msg
+   * If the sensor_origin_frame is not empty it will be used instead of the frame id
+   * of the input cloud as origin of the raycasting
+   *
+   * \param cloud_msg PointCloud message
+   * \param sensor_origin_frame frame of the raycasting origin
    */
-  void sensorCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+  void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+                     const std::string& sensor_origin_frame);
 
   /*!
    * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library
@@ -127,6 +128,10 @@ public:
    */
   void publishMap() const;
 
+  void publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
+                      typename VDBMappingT::UpdateGridT::Ptr overwrite,
+                      ros::Time stamp);
+
   /*!
    * \brief Creates a compressed Bitstream as ROS msg from an input grid
    *
@@ -134,7 +139,7 @@ public:
    *
    * \returns update msg
    */
-  std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+  vdb_mapping_msgs::UpdateGrid gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
    * \brief Creates a compressed Bitstream as string from an input grid
@@ -152,7 +157,8 @@ public:
    *
    * \returns Update Grid
    */
-  typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
+  typename VDBMappingT::UpdateGridT::Ptr
+  msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const;
 
   /*!
    * \brief Unpacks an update grid from a ROS msg
@@ -168,14 +174,15 @@ public:
    *
    * \param update_msg Single map update from a remote mapping instance
    */
-  void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapUpdateCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Listens to map overwrites and creates a map from these
    *
    * \param update_msg Single map overwrite from a remote mapping instance
    */
-  void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapOverwriteCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
+  void mapSectionCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Get the map frame name
@@ -183,13 +190,6 @@ public:
    * \returns Map frame name
    */
   const std::string& getMapFrame() const;
-
-  /*!
-   * \brief Get the frame used for raycasting scan aligned pointclouds
-   *
-   * \returns Sensor frame name
-   */
-  const std::string& getSensorFrame() const;
 
   /*!
    * \brief Returns the map
@@ -230,6 +230,7 @@ public:
   /*!
    * \brief Callback for map reset service call
    *
+   * \param req request of the map reset
    * \param res result of the map reset
    * \returns result of map reset
    */
@@ -242,7 +243,20 @@ public:
    * \param res current occupancy grid
    * \returns current occupancy grid
    */
-  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
+
+  bool mapResetCallback(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res);
+
+  /*!
+   * \brief Callback for raytrace service call
+   *
+   * \param req Origin and direction for raytracing
+   * \param res Resulting point of the raytrace
+   *
+   * \returns result of raytrace service
+   */
+  bool raytraceCallback(vdb_mapping_msgs::Raytrace::Request& req,
+                        vdb_mapping_msgs::Raytrace::Response& res);
+
 
   /*!
    * \brief Callback for dynamic reconfigure of parameters
@@ -250,6 +264,15 @@ public:
    * \param config new configuration
    */
   void dynamicReconfigureCallback(vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t);
+
+  /*!
+   * \brief Timer Callback for visualizing the entire map
+   *
+   * \param event
+   */
+  void visualizationTimerCallback(const ros::TimerEvent& event);
+  void updateTimerCallback(const ros::TimerEvent& event);
+  void sectionTimerCallback(const ros::TimerEvent& event);
 
 private:
   /*!
@@ -263,14 +286,9 @@ private:
   ros::NodeHandle m_priv_nh;
 
   /*!
-   * \brief Subscriber for raw pointclouds
+   * \brief Subscriber vector for pointclouds
    */
-  ros::Subscriber m_sensor_cloud_sub;
-
-  /*!
-   * \brief Subscriber for scan aligned pointclouds
-   */
-  ros::Subscriber m_aligned_cloud_sub;
+  std::vector<ros::Subscriber> m_cloud_subs;
 
   /*!
    * \brief Publisher for the marker array
@@ -291,6 +309,8 @@ private:
    * \brief Publisher for map overwrites
    */
   ros::Publisher m_map_overwrite_pub;
+
+  ros::Publisher m_map_section_pub;
 
   /*!
    * \brief Saves map in specified path from parameter server
@@ -318,9 +338,15 @@ private:
   ros::ServiceServer m_map_reset_service;
 
   /*!
+<<<<<<< HEAD
    * \brief Service to request an occupancy grid based on the current VDB map
    */
   ros::ServiceServer m_occupancy_grid_service;
+=======
+   * \brief Service for raytracing
+   */
+  ros::ServiceServer m_raytrace_service;
+>>>>>>> upstream/esasrc
 
   /*!
    * \brief Service for dynamic reconfigure of parameters
@@ -343,14 +369,10 @@ private:
   double m_resolution;
 
   /*!
-   * \brief Sensor frame used for raycasting of scan aligned pointclouds
-   */
-  std::string m_sensor_frame;
-
-  /*!
    * \brief Map Frame
    */
   std::string m_map_frame;
+  std::string m_robot_frame;
 
   /*!
    * \brief Map pointer
@@ -382,6 +404,8 @@ private:
    */
   bool m_publish_overwrites;
 
+  bool m_publish_sections;
+
   /*!
    * \brief Specifies whether the mapping applies raw sensor data
    */
@@ -394,6 +418,15 @@ private:
    * \brief Vector of remote mapping source connections
    */
   std::map<std::string, RemoteSource> m_remote_sources;
+
+  /*!
+   * \brief Timer for map visualization
+   */
+  ros::Timer m_visualization_timer;
+  bool m_accumulate_updates;
+  ros::Timer m_update_timer;
+  ros::Timer m_section_timer;
+
 
   /*!
    * \brief Specifies the lower z bound for the visualization

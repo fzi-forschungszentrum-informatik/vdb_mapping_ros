@@ -51,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   BoundingBox.msg
+  UpdateGrid.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -60,6 +61,7 @@ add_service_files(
   LoadMap.srv
   TriggerMapSectionUpdate.srv
   GetOccGrid.srv
+  Raytrace.srv
 )
 
 ## Generate actions in the 'action' folder
