@@ -648,8 +648,8 @@ void VDBMappingROS<VDBMappingT>::sectionTimerCallback(const ros::TimerEvent& eve
   }
 
   typename VDBMappingT::UpdateGridT::Ptr section =
-    m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-2, -2, -2),
-                                       Eigen::Matrix<double, 3, 1>(2, 2, 2),
+    m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-10, -10, -10),
+                                       Eigen::Matrix<double, 3, 1>(10, 10, 10),
                                        tf2::transformToEigen(map_to_robot_tf).matrix());
 
   vdb_mapping_msgs::UpdateGrid msg;
