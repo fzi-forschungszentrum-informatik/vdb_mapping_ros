@@ -1,3 +1,2 @@
-bool req_occ_grid
 ---
 nav_msgs/OccupancyGrid occupancy_grid

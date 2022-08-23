@@ -43,7 +43,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
   m_priv_nh.param<std::string>("map_save_dir", m_config.map_directory_path, "");
-  m_priv_nh.param<int>("voxel_number", m_number_of_voxels, 5);
+  m_priv_nh.param<int>("two_dim_projection_threshold", m_two_dim_projection_threshold, 5);
 
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
@@ -372,64 +372,57 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
 
 
 template <typename VDBMappingT>
-bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request&,
                                                     vdb_mapping_msgs::GetOccGrid::Response& res)
 {
-  if (req.req_occ_grid)
+  nav_msgs::OccupancyGrid grid;
+  openvdb::CoordBBox curr_bbox = m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
+  grid.header.frame_id         = m_map_frame;
+  grid.header.stamp            = ros::Time::now();
+  grid.info.height             = curr_bbox.dim().y();
+  grid.info.width              = curr_bbox.dim().x();
+  grid.info.resolution         = m_resolution;
+  std::vector<int> voxel_projection_grid;
+  grid.data.resize(grid.info.width * grid.info.height);
+  voxel_projection_grid.resize(grid.info.width * grid.info.height);
+
+  int x_offset = abs(curr_bbox.min().x());
+  int y_offset = abs(curr_bbox.min().y());
+
+  geometry_msgs::Pose origin_pose;
+  origin_pose.position.x = curr_bbox.min().x() * m_resolution;
+  origin_pose.position.y = curr_bbox.min().y() * m_resolution;
+  origin_pose.position.z = 0.00;
+
+  grid.info.origin   = origin_pose;
+  int world_to_index = 0;
+  for (openvdb::FloatGrid::ValueOnCIter iter = m_vdb_map->getGrid()->cbeginValueOn(); iter; ++iter)
   {
-    nav_msgs::OccupancyGrid grid_;
-    openvdb::CoordBBox curr_bbox_ = m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
-    grid_.header.frame_id         = m_map_frame;
-    grid_.header.stamp            = ros::Time::now();
-    grid_.info.height             = curr_bbox_.dim().y();
-    grid_.info.width              = curr_bbox_.dim().x();
-    grid_.info.resolution         = m_resolution;
-    std::vector<int> dummy_grid;
-    grid_.data.resize(grid_.info.width * grid_.info.height);
-    dummy_grid.resize(grid_.info.width * grid_.info.height);
-
-    int x_offset = abs(curr_bbox_.min().x());
-    int y_offset = abs(curr_bbox_.min().y());
-
-    geometry_msgs::Pose origin_pose;
-    origin_pose.position.x = curr_bbox_.min().x() * m_resolution;
-    origin_pose.position.y = curr_bbox_.min().y() * m_resolution;
-    origin_pose.position.z = 0.00;
-
-    grid_.info.origin = origin_pose;
-    int j             = 0;
-    for (openvdb::FloatGrid::ValueOnCIter iter = m_vdb_map->getGrid()->cbeginValueOn(); iter;
-         ++iter)
+    if (iter.isValueOn())
     {
-      if (iter.isValueOn())
-      {
-        j = (iter.getCoord().y() + y_offset) * curr_bbox_.dim().x() +
-            (iter.getCoord().x() + x_offset);
-        dummy_grid[j] += 1;
-      }
+      world_to_index =
+        (iter.getCoord().y() + y_offset) * curr_bbox.dim().x() + (iter.getCoord().x() + x_offset);
+      voxel_projection_grid[world_to_index] += 1;
     }
-
-    for (unsigned int i = 0; i < dummy_grid.size(); i++)
-    {
-      if (dummy_grid[i] > m_number_of_voxels)
-      {
-        grid_.data[i] = 100;
-      }
-      else if (dummy_grid[i] == 0)
-      {
-        grid_.data[i] = -1;
-      }
-      else
-      {
-        grid_.data[i] = 0;
-      }
-    }
-    res.occupancy_grid = grid_;
-
-
-    return true;
   }
-  return false;
+
+  for (size_t i = 0; i < voxel_projection_grid.size(); i++)
+  {
+    if (voxel_projection_grid[i] > m_two_dim_projection_threshold)
+    {
+      grid.data[i] = 100;
+    }
+    else if (voxel_projection_grid[i] == 0)
+    {
+      grid.data[i] = -1;
+    }
+    else
+    {
+      grid.data[i] = 0;
+    }
+  }
+  res.occupancy_grid = grid;
+  return true;
 }
 
 template <typename VDBMappingT>

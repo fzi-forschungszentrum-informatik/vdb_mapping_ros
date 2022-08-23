@@ -233,7 +233,7 @@ public:
    * \param res current occupancy grid
    * \returns current occupancy grid
    */
-  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request&,
                           vdb_mapping_msgs::GetOccGrid::Response& res);
 
   /*!
@@ -340,7 +340,7 @@ private:
    * \brief Service to request an occupancy grid based on the current VDB map
    */
   ros::ServiceServer m_occupancy_grid_service;
-  
+
   /*!
    * \brief Service for raytracing
    */
@@ -439,7 +439,7 @@ private:
   /*!
    * \brief Specifies the number of voxels which count as occupied for the occupancy grid
    */
-  int m_number_of_voxels;
+  int m_two_dim_projection_threshold;
 };
 
 #include "VDBMappingROS.hpp"
