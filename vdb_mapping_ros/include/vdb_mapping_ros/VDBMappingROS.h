@@ -243,7 +243,7 @@ public:
    * \param res result of the map reset
    * \returns result of map reset
    */
-  bool mapResetCallback(std_srvs::TriggerRequest&, std_srvs::TriggerResponse& res);
+  bool mapResetCallback(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res);
 
   /*!
    * \brief Callback for raytrace service call
