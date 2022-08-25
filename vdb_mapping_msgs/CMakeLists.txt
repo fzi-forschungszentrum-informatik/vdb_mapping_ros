@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   std_msgs
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,6 +60,7 @@ add_service_files(
   GetMapSection.srv
   LoadMap.srv
   TriggerMapSectionUpdate.srv
+  GetOccGrid.srv
   Raytrace.srv
 )
 
@@ -74,6 +76,7 @@ generate_messages(
   DEPENDENCIES
     geometry_msgs
     std_msgs
+    nav_msgs
 )
 
 ################################################
@@ -112,6 +115,7 @@ catkin_package(
     geometry_msgs
     message_runtime
     std_msgs
+    nav_msgs
 #  DEPENDS system_lib
 )
 

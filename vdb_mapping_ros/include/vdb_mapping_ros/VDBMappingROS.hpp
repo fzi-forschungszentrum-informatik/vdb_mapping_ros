@@ -43,6 +43,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<double>("prob_thres_min", m_config.prob_thres_min, 0.12);
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
   m_priv_nh.param<std::string>("map_save_dir", m_config.map_directory_path, "");
+  m_priv_nh.param<int>("two_dim_projection_threshold", m_two_dim_projection_threshold, 5);
 
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
@@ -179,6 +180,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_trigger_map_section_update_service = m_priv_nh.advertiseService(
     "trigger_map_section_update", &VDBMappingROS::triggerMapSectionUpdateCallback, this);
+  m_occupancy_grid_service =
+    m_priv_nh.advertiseService("get_occupancy_grid", &VDBMappingROS::occGridGenCallback, this);
 
   double visualization_rate;
   m_priv_nh.param<double>("visualization_rate", visualization_rate, 1.0);
@@ -367,6 +370,60 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
   return true;
 }
 
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request&,
+                                                    vdb_mapping_msgs::GetOccGrid::Response& res)
+{
+  nav_msgs::OccupancyGrid grid;
+  openvdb::CoordBBox curr_bbox = m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
+  grid.header.frame_id         = m_map_frame;
+  grid.header.stamp            = ros::Time::now();
+  grid.info.height             = curr_bbox.dim().y();
+  grid.info.width              = curr_bbox.dim().x();
+  grid.info.resolution         = m_resolution;
+  std::vector<int> voxel_projection_grid;
+  grid.data.resize(grid.info.width * grid.info.height);
+  voxel_projection_grid.resize(grid.info.width * grid.info.height);
+
+  int x_offset = abs(curr_bbox.min().x());
+  int y_offset = abs(curr_bbox.min().y());
+
+  geometry_msgs::Pose origin_pose;
+  origin_pose.position.x = curr_bbox.min().x() * m_resolution;
+  origin_pose.position.y = curr_bbox.min().y() * m_resolution;
+  origin_pose.position.z = 0.00;
+
+  grid.info.origin   = origin_pose;
+  int world_to_index = 0;
+  for (openvdb::FloatGrid::ValueOnCIter iter = m_vdb_map->getGrid()->cbeginValueOn(); iter; ++iter)
+  {
+    if (iter.isValueOn())
+    {
+      world_to_index =
+        (iter.getCoord().y() + y_offset) * curr_bbox.dim().x() + (iter.getCoord().x() + x_offset);
+      voxel_projection_grid[world_to_index] += 1;
+    }
+  }
+
+  for (size_t i = 0; i < voxel_projection_grid.size(); i++)
+  {
+    if (voxel_projection_grid[i] > m_two_dim_projection_threshold)
+    {
+      grid.data[i] = 100;
+    }
+    else if (voxel_projection_grid[i] == 0)
+    {
+      grid.data[i] = -1;
+    }
+    else
+    {
+      grid.data[i] = 0;
+    }
+  }
+  res.occupancy_grid = grid;
+  return true;
+}
 
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
@@ -558,14 +615,14 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   openvdb::Vec3d max = section->template metaValue<openvdb::Vec3d>("bb_max");
   openvdb::CoordBBox bbox(openvdb::Coord::floor(min), openvdb::Coord::floor(max));
 
-  for(auto iter = m_vdb_map->getGrid()->cbeginValueOn(); iter; ++iter)
+  for (auto iter = m_vdb_map->getGrid()->cbeginValueOn(); iter; ++iter)
   {
     if (bbox.isInside(iter.getCoord()))
     {
       acc.setActiveState(iter.getCoord(), false);
     }
   }
-  for(auto iter = section->cbeginValueOn();iter;++iter)
+  for (auto iter = section->cbeginValueOn(); iter; ++iter)
   {
     acc.setActiveState(iter.getCoord(), true);
   }
