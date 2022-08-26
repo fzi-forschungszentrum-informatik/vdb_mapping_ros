@@ -571,7 +571,7 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed an update");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " update(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
@@ -593,7 +593,7 @@ void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed an overwrite");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " overwrite(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
@@ -607,7 +607,7 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed a section");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " section(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
