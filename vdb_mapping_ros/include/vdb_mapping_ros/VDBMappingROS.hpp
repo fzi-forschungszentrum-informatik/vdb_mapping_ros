@@ -135,28 +135,32 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
     m_priv_nh.param<std::vector<std::string> >("sources", source_ids, std::vector<std::string>());
     for (auto& source_id : source_ids)
     {
-      std::string topic_name;
-      std::string sensor_origin_frame;
-      m_priv_nh.param<std::string>(source_id + "/topic", topic_name, "");
-      m_priv_nh.param<std::string>(source_id + "/sensor_origin_frame", sensor_origin_frame, "");
+      SensorSource sensor_source;
+
+      m_priv_nh.param<std::string>(source_id + "/topic", sensor_source.topic, "");
+      m_priv_nh.param<std::string>(
+        source_id + "/sensor_origin_frame", sensor_source.sensor_origin_frame, "");
+      m_priv_nh.param<double>(source_id + "/max_range", sensor_source.max_range, 0);
       ROS_INFO_STREAM("Setting up source: " << source_id);
-      if (topic_name.empty())
+      if (sensor_source.topic.empty())
       {
         ROS_ERROR_STREAM("No input topic specified for source: " << source_id);
         continue;
       }
-      ROS_INFO_STREAM("Topic: " << topic_name);
-      if (sensor_origin_frame.empty())
+      ROS_INFO_STREAM("Topic: " << sensor_source.topic);
+      if (sensor_source.sensor_origin_frame.empty())
       {
         ROS_INFO_STREAM("Using frame_id of topic as raycast origin");
       }
       else
       {
-        ROS_INFO_STREAM("Using " << sensor_origin_frame << " as raycast origin");
+        ROS_INFO_STREAM("Using " << sensor_source.sensor_origin_frame << " as raycast origin");
       }
 
       m_cloud_subs.push_back(m_nh.subscribe<sensor_msgs::PointCloud2>(
-        topic_name, 1, boost::bind(&VDBMappingROS::cloudCallback, this, _1, sensor_origin_frame)));
+        sensor_source.topic,
+        1,
+        boost::bind(&VDBMappingROS::cloudCallback, this, _1, sensor_source)));
     }
   }
 
@@ -427,14 +431,15 @@ bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid
 
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                                               const std::string& sensor_origin_frame)
+                                               const SensorSource& sensor_source)
 {
   typename VDBMappingT::PointCloudT::Ptr cloud(new typename VDBMappingT::PointCloudT);
   pcl::fromROSMsg(*cloud_msg, *cloud);
   geometry_msgs::TransformStamped cloud_origin_tf;
 
-  std::string sensor_frame =
-    sensor_origin_frame.empty() ? cloud_msg->header.frame_id : sensor_origin_frame;
+  std::string sensor_frame = sensor_source.sensor_origin_frame.empty()
+                               ? cloud_msg->header.frame_id
+                               : sensor_source.sensor_origin_frame;
 
   // Get the origin of the sensor used as a starting point of the ray cast
   try
@@ -467,7 +472,8 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
     pcl::transformPointCloud(*cloud, *cloud, tf2::transformToEigen(origin_to_map_tf).matrix());
     cloud->header.frame_id = m_map_frame;
   }
-  m_vdb_map->accumulateUpdate(cloud, tf2::transformToEigen(cloud_origin_tf).translation());
+  m_vdb_map->accumulateUpdate(
+    cloud, tf2::transformToEigen(cloud_origin_tf).translation(), sensor_source.max_range);
   if (!m_accumulate_updates)
   {
     typename VDBMappingT::UpdateGridT::Ptr update;

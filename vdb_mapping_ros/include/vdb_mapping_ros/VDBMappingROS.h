@@ -67,6 +67,13 @@ struct RemoteSource
   bool apply_remote_sections;
 };
 
+struct SensorSource
+{
+  std::string topic;
+  std::string sensor_origin_frame;
+  double max_range;
+};
+
 /*!
  * \brief ROS wrapper class for vdb_mapping
  */
@@ -110,7 +117,7 @@ public:
    * \param sensor_origin_frame frame of the raycasting origin
    */
   void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                     const std::string& sensor_origin_frame);
+                     const SensorSource& sensor_source);
 
   /*!
    * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library

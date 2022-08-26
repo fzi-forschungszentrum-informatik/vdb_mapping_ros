@@ -26,13 +26,17 @@ velodyne:
 
 front:
   topic: front_cloud/filtered
+  max_range: 3.0
 
 rear:
   topic: rear_cloud/filtered
+  max_range: 3.0
 
 left:
   topic: left_cloud/filtered
+  max_range: 3.0
 
 right:
   topic: right_cloud/filtered
+  max_range: 3.0
 
