@@ -330,13 +330,15 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return true;
   }
 
-  res.map     = gridToStr(m_vdb_map->getMapSectionUpdateGrid(
+  res.section                 = gridToMsg(m_vdb_map->getMapSectionUpdateGrid(
     Eigen::Matrix<double, 3, 1>(
       req.bounding_box.min_corner.x, req.bounding_box.min_corner.y, req.bounding_box.min_corner.z),
     Eigen::Matrix<double, 3, 1>(
       req.bounding_box.max_corner.x, req.bounding_box.max_corner.y, req.bounding_box.max_corner.z),
     tf2::transformToEigen(source_to_map_tf).matrix()));
-  res.success = true;
+  res.section.header.frame_id = m_map_frame;
+  res.section.header.stamp    = ros::Time::now();
+  res.success                 = true;
 
   return true;
 }
@@ -367,7 +369,7 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
 
   if (srv.response.success)
   {
-    m_vdb_map->overwriteMap(strToGrid(srv.response.map));
+    m_vdb_map->overwriteMap(strToGrid(srv.response.section.map));
   }
 
   res.success = srv.response.success;
@@ -571,7 +573,7 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " update(s)");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq - sequence_number) << " update(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
@@ -593,7 +595,7 @@ void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " overwrite(s)");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq - sequence_number) << " overwrite(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
@@ -607,7 +609,7 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   static unsigned int sequence_number = 0;
   if (sequence_number != update_msg->header.seq)
   {
-    ROS_WARN_STREAM("Missed " << (update_msg->header.seq-sequence_number) << " section(s)");
+    ROS_WARN_STREAM("Missed " << (update_msg->header.seq - sequence_number) << " section(s)");
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
