@@ -356,7 +356,7 @@ private:
   /*!
    * \brief Service for dynamic reconfigure of parameters
    */
-  dynamic_reconfigure::Server<vdb_mapping_ros::VDBMappingROSConfig> m_dynamic_reconfigure_service;
+  dynamic_reconfigure::Server<vdb_mapping_ros::VDBMappingROSConfig>* m_dynamic_reconfigure_service;
 
   /*!
    * \brief Transformation buffer
