@@ -416,10 +416,6 @@ private:
    */
   bool m_apply_raw_sensor_data;
   /*!
-   * \brief Specifies whether the data reduction is enabled
-   */
-  bool m_reduce_data;
-  /*!
    * \brief Vector of remote mapping source connections
    */
   std::map<std::string, RemoteSource> m_remote_sources;

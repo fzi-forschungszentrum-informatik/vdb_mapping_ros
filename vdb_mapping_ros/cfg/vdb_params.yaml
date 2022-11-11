@@ -11,7 +11,6 @@ publish_vis_marker: true
 publish_updates: true
 publish_overwrites: true
 apply_raw_sensor_data: true
-reduce_data: false
 map_save_dir: ""
 visualization_rate: 2
 accumulate_updates: true

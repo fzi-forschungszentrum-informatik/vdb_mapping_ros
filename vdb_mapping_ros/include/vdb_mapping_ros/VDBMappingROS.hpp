@@ -56,8 +56,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<bool>("publish_sections", m_publish_sections, false);
   m_priv_nh.param<bool>("apply_raw_sensor_data", m_apply_raw_sensor_data, true);
 
-  m_priv_nh.param<bool>("reduce_data", m_reduce_data, false);
-
   m_priv_nh.param<std::string>("map_frame", m_map_frame, "");
   if (m_map_frame.empty())
   {
@@ -532,7 +530,7 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   typename VDBMappingT::UpdateGridT::Ptr update;
   typename VDBMappingT::UpdateGridT::Ptr overwrite;
   // Integrate data into vdb grid
-  m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen, update, overwrite, m_reduce_data);
+  m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen, update, overwrite);
   publishUpdates(update, overwrite, transform.header.stamp);
 }
 
@@ -590,14 +588,7 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(
   }
   sequence_number++;
 
-  if (!m_reduce_data)
-  {
-    m_vdb_map->updateMap(msgToGrid(update_msg));
-  }
-  else
-  {
-    m_vdb_map->updateMap(m_vdb_map->raycastUpdateGrid(msgToGrid(update_msg)));
-  }
+  m_vdb_map->updateMap(msgToGrid(update_msg));
 }
 
 template <typename VDBMappingT>
