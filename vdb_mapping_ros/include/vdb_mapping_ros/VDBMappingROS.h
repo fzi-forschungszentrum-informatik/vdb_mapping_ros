@@ -277,7 +277,7 @@ public:
    * \param event
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
-  void updateTimerCallback(const ros::TimerEvent& event);
+  void accumulationUpdateTimerCallback(const ros::TimerEvent& event);
   void sectionTimerCallback(const ros::TimerEvent& event);
 
 private:
@@ -425,7 +425,7 @@ private:
    */
   ros::Timer m_visualization_timer;
   bool m_accumulate_updates;
-  ros::Timer m_update_timer;
+  ros::Timer m_accumulation_update_timer;
   ros::Timer m_section_timer;
 
   /*!

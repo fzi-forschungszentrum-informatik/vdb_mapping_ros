@@ -206,8 +206,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   {
     double accumulation_period;
     m_priv_nh.param<double>("accumulation_period", accumulation_period, 1);
-    m_update_timer = m_nh.createTimer(
-      ros::Rate(1.0 / accumulation_period), &VDBMappingROS::updateTimerCallback, this);
+    m_accumulation_update_timer = m_nh.createTimer(
+      ros::Rate(1.0 / accumulation_period), &VDBMappingROS::accumulationUpdateTimerCallback, this);
   }
 }
 
@@ -647,7 +647,7 @@ void VDBMappingROS<VDBMappingT>::visualizationTimerCallback(const ros::TimerEven
 }
 
 template <typename VDBMappingT>
-void VDBMappingROS<VDBMappingT>::updateTimerCallback(const ros::TimerEvent& event)
+void VDBMappingROS<VDBMappingT>::accumulationUpdateTimerCallback(const ros::TimerEvent& event)
 {
   // static unsigned int sequence_number = 0;
   typename VDBMappingT::UpdateGridT::Ptr update;
