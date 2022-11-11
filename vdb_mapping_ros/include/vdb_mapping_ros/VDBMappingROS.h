@@ -135,6 +135,14 @@ public:
    */
   void publishMap() const;
 
+
+  /*!
+   * \brief Publishes the update and overwrite grids of the current integration step
+   *
+   * \param update update grid
+   * \param overwrite overwrite grit
+   * \param stamp timestamp of the integration step
+   */
   void publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
                       typename VDBMappingT::UpdateGridT::Ptr overwrite,
                       ros::Time stamp) const;
@@ -189,6 +197,12 @@ public:
    * \param update_msg Single map overwrite from a remote mapping instance
    */
   void mapOverwriteCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
+
+  /*!
+   * \brief Listens to map sections and overwrites the map on corresponding sections
+   *
+   * \param update_msg Single map section from a remote mapping instance
+   */
   void mapSectionCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
@@ -277,7 +291,20 @@ public:
    * \param event
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
+
+  /*!
+   * \brief Timer Callback for integrating all accumulated data
+   *
+   * \param event
+   */
   void accumulationUpdateTimerCallback(const ros::TimerEvent& event);
+
+
+  /*!
+   * \brief Timer Callback for publishing map sections
+   *
+   * \param event
+   */
   void sectionTimerCallback(const ros::TimerEvent& event);
 
 private:
@@ -316,6 +343,9 @@ private:
    */
   ros::Publisher m_map_overwrite_pub;
 
+  /*!
+   * \brief Publisher for map sections
+   */
   ros::Publisher m_map_section_pub;
 
   /*!
@@ -377,6 +407,9 @@ private:
    * \brief Map Frame
    */
   std::string m_map_frame;
+  /*!
+   * \brief Robot Frame
+   */
   std::string m_robot_frame;
 
   /*!
@@ -409,6 +442,9 @@ private:
    */
   bool m_publish_overwrites;
 
+  /*!
+   * \brief Specifies whether the mapping publishes map sections for remote use
+   */
   bool m_publish_sections;
 
   /*!
@@ -424,8 +460,18 @@ private:
    * \brief Timer for map visualization
    */
   ros::Timer m_visualization_timer;
+
+  /*!
+   * \brief Specifies whether the
+   */
   bool m_accumulate_updates;
+  /*!
+   * \brief Timer for integrating accumulated data
+   */
   ros::Timer m_accumulation_update_timer;
+  /*!
+   * \brief Timer for publishing map sections
+   */
   ros::Timer m_section_timer;
 
   /*!
