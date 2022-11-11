@@ -656,47 +656,6 @@ void VDBMappingROS<VDBMappingT>::accumulationUpdateTimerCallback(const ros::Time
 
   publishUpdates(update, overwrite, event.current_real);
   m_vdb_map->resetUpdate();
-
-  // geometry_msgs::TransformStamped source_to_map_tf;
-  // try
-  //{
-  // source_to_map_tf =
-  // m_tf_buffer.lookupTransform(m_map_frame, "base_link", ros::Time(0), ros::Duration(1.0));
-  //}
-  // catch (tf::TransformException& ex)
-  //{
-  // ROS_ERROR_STREAM("Transform from source to map frame failed: " << ex.what());
-  //}
-
-  // typename VDBMappingT::UpdateGridT::Ptr blub =
-  // m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-10, -10, -10),
-  // Eigen::Matrix<double, 3, 1>(10, 10, 10),
-  // tf2::transformToEigen(source_to_map_tf).matrix());
-  // std_msgs::String bla;
-  // bla.data = gridToStr(blub);
-
-  // m_bla_pub.publish(bla);
-
-  // typename VDBMappingT::UpdateGridT::Accessor u_acc = blub->getAccessor();
-  // typename VDBMappingT::GridT::Accessor g_acc       = m_vdb_map->getGrid()->getAccessor();
-
-  // int on  = 0;
-  // int off = 0;
-
-  // for (typename VDBMappingT::UpdateGridT::ValueAllCIter iter = blub->cbeginValueAll(); iter;
-  // ++iter)
-  //{
-  // if (u_acc.isValueOn(iter.getCoord()))
-  //{
-  // on++;
-  // g_acc.setActiveState(iter.getCoord(), true);
-  //}
-  // else
-  //{
-  // off++;
-  // g_acc.setActiveState(iter.getCoord(), false);
-  //}
-  //}
 }
 
 template <typename VDBMappingT>
