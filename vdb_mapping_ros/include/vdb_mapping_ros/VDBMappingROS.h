@@ -288,14 +288,14 @@ public:
   /*!
    * \brief Timer Callback for visualizing the entire map
    *
-   * \param event
+   * \param event ROS Timer event
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
 
   /*!
    * \brief Timer Callback for integrating all accumulated data
    *
-   * \param event
+   * \param event ROS Timer event
    */
   void accumulationUpdateTimerCallback(const ros::TimerEvent& event);
 
@@ -303,7 +303,7 @@ public:
   /*!
    * \brief Timer Callback for publishing map sections
    *
-   * \param event
+   * \param event ROS Timer event
    */
   void sectionTimerCallback(const ros::TimerEvent& event);
 
