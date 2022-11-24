@@ -114,7 +114,7 @@ public:
    * of the input cloud as origin of the raycasting
    *
    * \param cloud_msg PointCloud message
-   * \param sensor_origin_frame frame of the raycasting origin
+   * \param sensor_source Sensor source corresponding to the Pointcloud
    */
   void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
                      const SensorSource& sensor_source);
