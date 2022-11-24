@@ -32,6 +32,7 @@
 template <typename VDBMappingT>
 VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   : m_priv_nh(nh)
+  , m_dynamic_reconfigure_service(ros::NodeHandle("~/vdb_mapping"))
   , m_tf_listener(m_tf_buffer)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
@@ -184,10 +185,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_raytrace_service =
     m_priv_nh.advertiseService("raytrace", &VDBMappingROS::raytraceCallback, this);
 
-  m_dynamic_reconfigure_service =
-    new dynamic_reconfigure::Server<vdb_mapping_ros::VDBMappingROSConfig>(
-      ros::NodeHandle("~/vdb_mapping"));
-  m_dynamic_reconfigure_service->setCallback(
+  m_dynamic_reconfigure_service.setCallback(
     boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 
   m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
