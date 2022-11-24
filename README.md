@@ -61,6 +61,7 @@ Subscriber for pointclouds in sensor coordinates
 
 ### ROS Parameters
 All parameters can be passed as commandline arguments to the launch file.
+
 | Parameter Name     | Type    | Default              | Information
 | ------------------ | ------- | -------------------- | -----------
 | aligned_points     | string  | scan_matched_points2 | Pointclouds which are already aligned to a specific frame (e.g. /map)
