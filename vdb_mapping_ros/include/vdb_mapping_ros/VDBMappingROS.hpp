@@ -503,7 +503,7 @@ void VDBMappingROS<VDBMappingT>::cloudCallback(const sensor_msgs::PointCloud2::C
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
                                                 typename VDBMappingT::UpdateGridT::Ptr overwrite,
-                                                ros::Time stamp)
+                                                ros::Time stamp) const
 
 {
   static unsigned int sequence_number = 0;
