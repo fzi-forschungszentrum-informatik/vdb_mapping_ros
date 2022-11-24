@@ -240,7 +240,7 @@ public:
    * \param res current occupancy grid
    * \returns current occupancy grid
    */
-  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request&,
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
                           vdb_mapping_msgs::GetOccGrid::Response& res);
 
   /*!

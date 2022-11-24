@@ -391,9 +391,10 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
 
 
 template <typename VDBMappingT>
-bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request&,
+bool VDBMappingROS<VDBMappingT>::occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
                                                     vdb_mapping_msgs::GetOccGrid::Response& res)
 {
+  (void)req;
   nav_msgs::OccupancyGrid grid;
   openvdb::CoordBBox curr_bbox = m_vdb_map->getGrid()->evalActiveVoxelBoundingBox();
   grid.header.frame_id         = m_map_frame;
