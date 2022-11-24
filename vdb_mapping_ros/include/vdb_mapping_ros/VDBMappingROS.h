@@ -140,7 +140,7 @@ public:
    * \brief Publishes the update and overwrite grids of the current integration step
    *
    * \param update update grid
-   * \param overwrite overwrite grit
+   * \param overwrite overwrite grid
    * \param stamp timestamp of the integration step
    */
   void publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
