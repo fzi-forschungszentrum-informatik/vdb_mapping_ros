@@ -124,9 +124,19 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
       m_priv_nh.advertise<vdb_mapping_msgs::UpdateGrid>("vdb_map_sections", 1, true);
 
     double section_update_rate;
-    m_priv_nh.param<double>("section_update_rate", section_update_rate, 1);
+    m_priv_nh.param<double>("section_update/rate", section_update_rate, 1);
+
     m_section_timer =
       m_nh.createTimer(ros::Rate(section_update_rate), &VDBMappingROS::sectionTimerCallback, this);
+
+
+    m_priv_nh.param<double>("section_update/min_coord/x", m_section_min_coord.x(), -10);
+    m_priv_nh.param<double>("section_update/min_coord/y", m_section_min_coord.y(), -10);
+    m_priv_nh.param<double>("section_update/min_coord/z", m_section_min_coord.z(), -10);
+    m_priv_nh.param<double>("section_update/max_coord/x", m_section_max_coord.x(), 10);
+    m_priv_nh.param<double>("section_update/max_coord/y", m_section_max_coord.y(), 10);
+    m_priv_nh.param<double>("section_update/max_coord/z", m_section_max_coord.z(), 10);
+    m_priv_nh.param<std::string>("section_update/frame", m_section_update_frame, m_robot_frame);
   }
 
   if (m_apply_raw_sensor_data)
@@ -707,18 +717,16 @@ void VDBMappingROS<VDBMappingT>::sectionTimerCallback(const ros::TimerEvent& eve
   geometry_msgs::TransformStamped map_to_robot_tf;
   try
   {
-    map_to_robot_tf =
-      m_tf_buffer.lookupTransform(m_map_frame, m_robot_frame, ros::Time(0), ros::Duration(1.0));
+    map_to_robot_tf = m_tf_buffer.lookupTransform(
+      m_map_frame, m_section_update_frame, ros::Time(0), ros::Duration(1.0));
   }
   catch (tf::TransformException& ex)
   {
     ROS_ERROR_STREAM("Transform from source to map frame failed: " << ex.what());
   }
 
-  typename VDBMappingT::UpdateGridT::Ptr section =
-    m_vdb_map->getMapSectionUpdateGrid(Eigen::Matrix<double, 3, 1>(-10, -10, -10),
-                                       Eigen::Matrix<double, 3, 1>(10, 10, 10),
-                                       tf2::transformToEigen(map_to_robot_tf).matrix());
+  typename VDBMappingT::UpdateGridT::Ptr section = m_vdb_map->getMapSectionUpdateGrid(
+    m_section_min_coord, m_section_max_coord, tf2::transformToEigen(map_to_robot_tf).matrix());
 
   vdb_mapping_msgs::UpdateGrid msg;
   msg.header.frame_id = m_map_frame;

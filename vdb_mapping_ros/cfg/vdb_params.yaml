@@ -10,14 +10,23 @@ publish_pointcloud: true
 publish_vis_marker: true
 publish_updates: true
 publish_overwrites: true
-publish_sections: true
 apply_raw_sensor_data: true
 reduce_data: false
 map_save_dir: ""
 visualization_rate: 2
 accumulate_updates: true
 accumulation_period: 0.2
-section_update_rate: 1
+publish_sections: true
+section_update:
+  rate: 1
+  min_coord:
+    x: -10
+    y: -10
+    z: -10
+  max_coord:
+    x: 10
+    y: 10
+    z: 10
 
 sources: [velodyne, front, rear, left, right]
 velodyne:

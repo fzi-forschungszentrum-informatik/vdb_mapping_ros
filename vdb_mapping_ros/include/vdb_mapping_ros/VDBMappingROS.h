@@ -432,6 +432,18 @@ private:
   ros::Timer m_update_timer;
   ros::Timer m_section_timer;
 
+  /*!
+   * \brief Min Coordinate of the section update bounding box
+   */
+  Eigen::Matrix<double,3,1> m_section_min_coord;
+  /*!
+   * \brief Max Coordinate of the section update bounding box
+   */
+  Eigen::Matrix<double,3,1> m_section_max_coord;
+  /*!
+   * \brief Reference Frame for the section update
+   */
+  std::string m_section_update_frame;
 
   /*!
    * \brief Specifies the lower z bound for the visualization
