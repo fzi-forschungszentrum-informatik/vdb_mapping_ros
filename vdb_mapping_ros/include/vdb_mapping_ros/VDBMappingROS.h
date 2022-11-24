@@ -462,7 +462,7 @@ private:
   ros::Timer m_visualization_timer;
 
   /*!
-   * \brief Specifies whether the
+   * \brief Specifies whether the sensor data is accumulated before updating the map
    */
   bool m_accumulate_updates;
   /*!
