@@ -178,7 +178,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_pointcloud_pub = m_priv_nh.advertise<sensor_msgs::PointCloud2>("vdb_map_pointcloud", 1, true);
 
   m_map_reset_service =
-    m_priv_nh.advertiseService("vdb_map_reset", &VDBMappingROS::mapResetCallback, this);
+    m_priv_nh.advertiseService("reset_map", &VDBMappingROS::mapResetCallback, this);
 
   m_raytrace_service =
     m_priv_nh.advertiseService("raytrace", &VDBMappingROS::raytraceCallback, this);
