@@ -12,7 +12,6 @@ publish_updates: false
 publish_overwrites: false
 publish_sections: false
 apply_raw_sensor_data: false
-reduce_data: false
 map_save_dir: ""
 
 remote_sources: [vdb_mapping]
