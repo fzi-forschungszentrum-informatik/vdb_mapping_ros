@@ -33,9 +33,11 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 #include <vdb_mapping_msgs/GetMapSection.h>
+#include <vdb_mapping_msgs/GetOccGrid.h>
 #include <vdb_mapping_msgs/LoadMap.h>
 #include <vdb_mapping_msgs/Raytrace.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
+#include <vdb_mapping_msgs/UpdateGrid.h>
 #include <visualization_msgs/Marker.h>
 
 #include <openvdb/io/Stream.h>
@@ -58,9 +60,18 @@ struct RemoteSource
 {
   ros::Subscriber map_update_sub;
   ros::Subscriber map_overwrite_sub;
+  ros::Subscriber map_section_sub;
   ros::ServiceClient get_map_section_client;
   bool apply_remote_updates;
   bool apply_remote_overwrites;
+  bool apply_remote_sections;
+};
+
+struct SensorSource
+{
+  std::string topic;
+  std::string sensor_origin_frame;
+  double max_range;
 };
 
 /*!
@@ -103,10 +114,10 @@ public:
    * of the input cloud as origin of the raycasting
    *
    * \param cloud_msg PointCloud message
-   * \param sensor_origin_frame frame of the raycasting origin
+   * \param sensor_source Sensor source corresponding to the Pointcloud
    */
   void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                     const std::string& sensor_origin_frame);
+                     const SensorSource& sensor_source);
 
   /*!
    * \brief Integrating the transformed pointcloud and sensor origins into the core mapping library
@@ -124,6 +135,10 @@ public:
    */
   void publishMap() const;
 
+  void publishUpdates(typename VDBMappingT::UpdateGridT::Ptr update,
+                      typename VDBMappingT::UpdateGridT::Ptr overwrite,
+                      ros::Time stamp) const;
+
   /*!
    * \brief Creates a compressed Bitstream as ROS msg from an input grid
    *
@@ -131,7 +146,7 @@ public:
    *
    * \returns update msg
    */
-  std_msgs::String gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+  vdb_mapping_msgs::UpdateGrid gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
    * \brief Creates a compressed Bitstream as string from an input grid
@@ -149,7 +164,8 @@ public:
    *
    * \returns Update Grid
    */
-  typename VDBMappingT::UpdateGridT::Ptr msgToGrid(const std_msgs::String::ConstPtr& msg) const;
+  typename VDBMappingT::UpdateGridT::Ptr
+  msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const;
 
   /*!
    * \brief Unpacks an update grid from a ROS msg
@@ -165,14 +181,15 @@ public:
    *
    * \param update_msg Single map update from a remote mapping instance
    */
-  void mapUpdateCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapUpdateCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Listens to map overwrites and creates a map from these
    *
    * \param update_msg Single map overwrite from a remote mapping instance
    */
-  void mapOverwriteCallback(const std_msgs::String::ConstPtr& update_msg);
+  void mapOverwriteCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
+  void mapSectionCallback(const vdb_mapping_msgs::UpdateGrid::ConstPtr& update_msg);
 
   /*!
    * \brief Get the map frame name
@@ -218,6 +235,15 @@ public:
                                        vdb_mapping_msgs::TriggerMapSectionUpdate::Response& res);
 
   /*!
+   * \brief Callback for occupancy grid service call
+   *
+   * \param res current occupancy grid
+   * \returns current occupancy grid
+   */
+  bool occGridGenCallback(vdb_mapping_msgs::GetOccGrid::Request& req,
+                          vdb_mapping_msgs::GetOccGrid::Response& res);
+
+  /*!
    * \brief Callback for map reset service call
    *
    * \param req request of the map reset
@@ -251,6 +277,8 @@ public:
    * \param event
    */
   void visualizationTimerCallback(const ros::TimerEvent& event);
+  void updateTimerCallback(const ros::TimerEvent& event);
+  void sectionTimerCallback(const ros::TimerEvent& event);
 
 private:
   /*!
@@ -288,6 +316,8 @@ private:
    */
   ros::Publisher m_map_overwrite_pub;
 
+  ros::Publisher m_map_section_pub;
+
   /*!
    * \brief Saves map in specified path from parameter server
    */
@@ -312,6 +342,11 @@ private:
    * \brief Service for reset map
    */
   ros::ServiceServer m_map_reset_service;
+
+  /*!
+   * \brief Service to request an occupancy grid based on the current VDB map
+   */
+  ros::ServiceServer m_occupancy_grid_service;
 
   /*!
    * \brief Service for raytracing
@@ -342,6 +377,7 @@ private:
    * \brief Map Frame
    */
   std::string m_map_frame;
+  std::string m_robot_frame;
 
   /*!
    * \brief Map pointer
@@ -373,6 +409,8 @@ private:
    */
   bool m_publish_overwrites;
 
+  bool m_publish_sections;
+
   /*!
    * \brief Specifies whether the mapping applies raw sensor data
    */
@@ -390,6 +428,22 @@ private:
    * \brief Timer for map visualization
    */
   ros::Timer m_visualization_timer;
+  bool m_accumulate_updates;
+  ros::Timer m_update_timer;
+  ros::Timer m_section_timer;
+
+  /*!
+   * \brief Min Coordinate of the section update bounding box
+   */
+  Eigen::Matrix<double,3,1> m_section_min_coord;
+  /*!
+   * \brief Max Coordinate of the section update bounding box
+   */
+  Eigen::Matrix<double,3,1> m_section_max_coord;
+  /*!
+   * \brief Reference Frame for the section update
+   */
+  std::string m_section_update_frame;
 
   /*!
    * \brief Specifies the lower z bound for the visualization
@@ -400,6 +454,11 @@ private:
    * \brief Specifies the upper z bound for the visualization
    */
   double m_upper_visualization_z_limit;
+
+  /*!
+   * \brief Specifies the number of voxels which count as occupied for the occupancy grid
+   */
+  int m_two_dim_projection_threshold;
 };
 
 #include "VDBMappingROS.hpp"

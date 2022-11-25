@@ -1,4 +1,5 @@
 map_frame: map
+robot_frame: base_link
 max_range: 10.0
 resolution: 0.07
 prob_hit: 0.99
@@ -13,6 +14,19 @@ apply_raw_sensor_data: true
 reduce_data: false
 map_save_dir: ""
 visualization_rate: 2
+accumulate_updates: true
+accumulation_period: 0.2
+publish_sections: true
+section_update:
+  rate: 1
+  min_coord:
+    x: -10
+    y: -10
+    z: -10
+  max_coord:
+    x: 10
+    y: 10
+    z: 10
 
 sources: [velodyne, front, rear, left, right]
 velodyne:
@@ -21,13 +35,17 @@ velodyne:
 
 front:
   topic: front_cloud/filtered
+  max_range: 3.0
 
 rear:
   topic: rear_cloud/filtered
+  max_range: 3.0
 
 left:
   topic: left_cloud/filtered
+  max_range: 3.0
 
 right:
   topic: right_cloud/filtered
+  max_range: 3.0
 
