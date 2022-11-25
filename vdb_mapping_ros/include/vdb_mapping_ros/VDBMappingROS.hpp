@@ -626,7 +626,6 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   }
   sequence_number++;
 
-  // TODO move to core lib
   typename VDBMappingT::UpdateGridT::Ptr section          = msgToGrid(update_msg);
   typename VDBMappingT::UpdateGridT::Accessor section_acc = section->getAccessor();
   typename VDBMappingT::GridT::Accessor acc               = m_vdb_map->getGrid()->getAccessor();
