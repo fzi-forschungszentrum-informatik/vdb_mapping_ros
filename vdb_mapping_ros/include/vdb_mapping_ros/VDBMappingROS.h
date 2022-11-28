@@ -477,11 +477,11 @@ private:
   /*!
    * \brief Min Coordinate of the section update bounding box
    */
-  Eigen::Matrix<double,3,1> m_section_min_coord;
+  Eigen::Matrix<double, 3, 1> m_section_min_coord;
   /*!
    * \brief Max Coordinate of the section update bounding box
    */
-  Eigen::Matrix<double,3,1> m_section_max_coord;
+  Eigen::Matrix<double, 3, 1> m_section_max_coord;
   /*!
    * \brief Reference Frame for the section update
    */
