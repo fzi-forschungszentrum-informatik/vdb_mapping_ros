@@ -15,6 +15,7 @@ endif()
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
+  nav_msgs
   pcl_conversions
   pcl_ros
   roscpp
@@ -36,6 +37,7 @@ catkin_package(
     include
   CATKIN_DEPENDS
     dynamic_reconfigure
+    nav_msgs
     pcl_conversions
     pcl_ros
     roscpp
