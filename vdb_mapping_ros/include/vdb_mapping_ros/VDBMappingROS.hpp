@@ -65,7 +65,7 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<std::string>("robot_frame", m_robot_frame, "");
   if (m_robot_frame.empty())
   {
-    ROS_WARN_STREAM("No map frame specified");
+    ROS_WARN_STREAM("No robot frame specified");
   }
 
 
@@ -691,8 +691,6 @@ void VDBMappingROS<VDBMappingT>::publishMap() const
   {
     return;
   }
-
-  typename VDBMappingT::GridT::Ptr grid = m_vdb_map->getGrid();
 
   bool publish_vis_marker;
   publish_vis_marker = (m_publish_vis_marker && m_visualization_marker_pub.getNumSubscribers() > 0);

@@ -251,6 +251,7 @@ public:
   /*!
    * \brief Callback for occupancy grid service call
    *
+   * \param req Trigger request
    * \param res current occupancy grid
    * \returns current occupancy grid
    */
