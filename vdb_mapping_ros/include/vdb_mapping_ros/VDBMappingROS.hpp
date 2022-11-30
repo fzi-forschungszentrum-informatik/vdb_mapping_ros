@@ -37,6 +37,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
   m_vdb_map = std::make_unique<VDBMappingT>(m_resolution);
+  m_dynamic_reconfigure_service.setCallback(
+    boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
@@ -182,9 +184,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_raytrace_service =
     m_priv_nh.advertiseService("raytrace", &VDBMappingROS::raytraceCallback, this);
-
-  m_dynamic_reconfigure_service.setCallback(
-    boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 
   m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
   m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
