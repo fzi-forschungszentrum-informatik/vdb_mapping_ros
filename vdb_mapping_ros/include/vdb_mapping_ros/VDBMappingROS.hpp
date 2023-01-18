@@ -616,25 +616,7 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   }
   sequence_number++;
 
-  typename VDBMappingT::UpdateGridT::Ptr section          = msgToGrid(update_msg);
-  typename VDBMappingT::UpdateGridT::Accessor section_acc = section->getAccessor();
-  typename VDBMappingT::GridT::Accessor acc               = m_vdb_map->getGrid()->getAccessor();
-
-  openvdb::Vec3d min = section->template metaValue<openvdb::Vec3d>("bb_min");
-  openvdb::Vec3d max = section->template metaValue<openvdb::Vec3d>("bb_max");
-  openvdb::CoordBBox bbox(openvdb::Coord::floor(min), openvdb::Coord::floor(max));
-
-  for (auto iter = m_vdb_map->getGrid()->cbeginValueOn(); iter; ++iter)
-  {
-    if (bbox.isInside(iter.getCoord()))
-    {
-      acc.setActiveState(iter.getCoord(), false);
-    }
-  }
-  for (auto iter = section->cbeginValueOn(); iter; ++iter)
-  {
-    acc.setActiveState(iter.getCoord(), true);
-  }
+  m_vdb_map->applyMapSectionUpdateGrid(msgToGrid(update_msg));
 }
 
 
