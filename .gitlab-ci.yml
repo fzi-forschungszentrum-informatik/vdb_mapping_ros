@@ -111,7 +111,7 @@ create_deb_noetic:
 upload_debs_noetic:
   image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_ros
   variables:
-    ROS_DISTRIBUTION: noetic
+    ROS_DISTRO: noetic
   extends: .upload_debs
   dependencies:
     - create_deb_noetic
