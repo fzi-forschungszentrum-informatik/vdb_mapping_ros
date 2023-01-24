@@ -502,6 +502,10 @@ private:
    * \brief Specifies the number of voxels which count as occupied for the occupancy grid
    */
   int m_two_dim_projection_threshold;
+  /*!
+   * \brief Initialization flag used to prevent dynamic reconfigure from overriding parameter file
+   */
+  bool m_dynamic_reconfigure_initialized;
 };
 
 #include "VDBMappingROS.hpp"

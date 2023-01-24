@@ -37,8 +37,6 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 {
   m_priv_nh.param<double>("resolution", m_resolution, 0.1);
   m_vdb_map = std::make_unique<VDBMappingT>(m_resolution);
-  m_dynamic_reconfigure_service.setCallback(
-    boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 
   m_priv_nh.param<double>("max_range", m_config.max_range, 15.0);
   m_priv_nh.param<double>("prob_hit", m_config.prob_hit, 0.7);
@@ -47,6 +45,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_priv_nh.param<double>("prob_thres_max", m_config.prob_thres_max, 0.97);
   m_priv_nh.param<std::string>("map_save_dir", m_config.map_directory_path, "");
   m_priv_nh.param<int>("two_dim_projection_threshold", m_two_dim_projection_threshold, 5);
+  m_priv_nh.param<double>("lower_visualization_z_limit", m_lower_visualization_z_limit, 0);
+  m_priv_nh.param<double>("upper_visualization_z_limit", m_upper_visualization_z_limit, 0);
 
   // Configuring the VDB map
   m_vdb_map->setConfig(m_config);
@@ -208,12 +208,28 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
     m_accumulation_update_timer = m_nh.createTimer(
       ros::Rate(1.0 / accumulation_period), &VDBMappingROS::accumulationUpdateTimerCallback, this);
   }
+  m_dynamic_reconfigure_initialized = false;
+  m_dynamic_reconfigure_service.setCallback(
+    boost::bind(&VDBMappingROS::dynamicReconfigureCallback, this, _1, _2));
 }
 
 template <typename VDBMappingT>
 void VDBMappingROS<VDBMappingT>::dynamicReconfigureCallback(
   vdb_mapping_ros::VDBMappingROSConfig& config, uint32_t)
 {
+  if (!m_dynamic_reconfigure_initialized)
+  {
+    config.max_range                   = m_config.max_range;
+    config.publish_pointcloud          = m_publish_pointcloud;
+    config.publish_vis_marker          = m_publish_vis_marker;
+    config.publish_updates             = m_publish_updates;
+    config.publish_overwrites          = m_publish_overwrites;
+    config.lower_visualization_z_limit = m_lower_visualization_z_limit;
+    config.upper_visualization_z_limit = m_upper_visualization_z_limit;
+    m_dynamic_reconfigure_initialized  = true;
+    return;
+  }
+
   ROS_INFO("Dynamic reconfigure of parameters.");
   m_config.max_range = config.max_range;
   m_vdb_map->setConfig(m_config);
