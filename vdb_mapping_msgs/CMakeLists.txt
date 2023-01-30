@@ -59,6 +59,7 @@ add_service_files(
   FILES
   GetMapSection.srv
   LoadMap.srv
+  LoadMapFromPCD.srv
   TriggerMapSectionUpdate.srv
   GetOccGrid.srv
   Raytrace.srv
