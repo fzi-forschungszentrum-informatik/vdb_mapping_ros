@@ -190,6 +190,8 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
 
   m_save_map_service_server = m_priv_nh.advertiseService("save_map", &VDBMappingROS::saveMap, this);
   m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
+  m_load_map_from_pcd_service_server =
+    m_priv_nh.advertiseService("load_map_from_pcd", &VDBMappingROS::loadMapFromPCD, this);
   m_get_map_section_service =
     m_priv_nh.advertiseService("get_map_section", &VDBMappingROS::getMapSectionCallback, this);
 
@@ -317,6 +319,17 @@ bool VDBMappingROS<VDBMappingT>::loadMap(vdb_mapping_msgs::LoadMap::Request& req
 {
   ROS_INFO_STREAM("Loading Map");
   bool success = m_vdb_map->loadMap(req.path);
+  publishMap();
+  res.success = success;
+  return success;
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::loadMapFromPCD(vdb_mapping_msgs::LoadMapFromPCD::Request& req,
+                                                vdb_mapping_msgs::LoadMapFromPCD::Response& res)
+{
+  ROS_INFO_STREAM("Loading Map from PCD file");
+  bool success = m_vdb_map->loadMapFromPCD(req.path, req.set_background);
   publishMap();
   res.success = success;
   return success;

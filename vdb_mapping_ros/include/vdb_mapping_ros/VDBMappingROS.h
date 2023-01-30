@@ -35,6 +35,7 @@
 #include <vdb_mapping_msgs/GetMapSection.h>
 #include <vdb_mapping_msgs/GetOccGrid.h>
 #include <vdb_mapping_msgs/LoadMap.h>
+#include <vdb_mapping_msgs/LoadMapFromPCD.h>
 #include <vdb_mapping_msgs/Raytrace.h>
 #include <vdb_mapping_msgs/TriggerMapSectionUpdate.h>
 #include <vdb_mapping_msgs/UpdateGrid.h>
@@ -106,6 +107,8 @@ public:
    */
   bool loadMap(vdb_mapping_msgs::LoadMap::Request& req, vdb_mapping_msgs::LoadMap::Response& res);
 
+  bool loadMapFromPCD(vdb_mapping_msgs::LoadMapFromPCD::Request& req,
+                      vdb_mapping_msgs::LoadMapFromPCD::Response& res);
 
   /*!
    * \brief Sensor callback for Pointclouds
@@ -376,6 +379,8 @@ private:
    * \brief Loads a map from specified path from service
    */
   ros::ServiceServer m_load_map_service_server;
+
+  ros::ServiceServer m_load_map_from_pcd_service_server;
 
   /*!
    * \brief Service for map section requests
