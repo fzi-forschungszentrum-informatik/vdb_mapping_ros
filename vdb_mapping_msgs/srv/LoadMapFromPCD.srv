@@ -1,4 +1,5 @@
 string path
 bool set_background
+bool clear_map
 ---
 bool success

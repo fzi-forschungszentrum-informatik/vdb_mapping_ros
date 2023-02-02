@@ -329,7 +329,7 @@ bool VDBMappingROS<VDBMappingT>::loadMapFromPCD(vdb_mapping_msgs::LoadMapFromPCD
                                                 vdb_mapping_msgs::LoadMapFromPCD::Response& res)
 {
   ROS_INFO_STREAM("Loading Map from PCD file");
-  bool success = m_vdb_map->loadMapFromPCD(req.path, req.set_background);
+  bool success = m_vdb_map->loadMapFromPCD(req.path, req.set_background, req.clear_map);
   publishMap();
   res.success = success;
   return success;
