@@ -101,12 +101,19 @@ public:
    */
   bool saveMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 
+  /*!
+   * \brief Saves the active values of the current map as PCD file
+   */
+  bool saveMapToPCD(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 
   /*!
    * \brief Load stored map
    */
   bool loadMap(vdb_mapping_msgs::LoadMap::Request& req, vdb_mapping_msgs::LoadMap::Response& res);
 
+  /*!
+   * \brief Generates the map from a PCD file
+   */
   bool loadMapFromPCD(vdb_mapping_msgs::LoadMapFromPCD::Request& req,
                       vdb_mapping_msgs::LoadMapFromPCD::Response& res);
 
@@ -376,10 +383,19 @@ private:
   ros::ServiceServer m_save_map_service_server;
 
   /*!
+   * \brief Saves the active values of the map as PCD file in specified path from
+   * parameter server
+   */
+  ros::ServiceServer m_save_map_to_pcd_service_server;
+
+  /*!
    * \brief Loads a map from specified path from service
    */
   ros::ServiceServer m_load_map_service_server;
 
+  /*!
+   * \brief Generates a map from a PCD file path specified from service
+   */
   ros::ServiceServer m_load_map_from_pcd_service_server;
 
   /*!

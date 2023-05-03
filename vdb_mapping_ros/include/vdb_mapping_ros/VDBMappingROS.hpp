@@ -192,6 +192,9 @@ VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   m_load_map_service_server = m_priv_nh.advertiseService("load_map", &VDBMappingROS::loadMap, this);
   m_load_map_from_pcd_service_server =
     m_priv_nh.advertiseService("load_map_from_pcd", &VDBMappingROS::loadMapFromPCD, this);
+  m_save_map_to_pcd_service_server =
+    m_priv_nh.advertiseService("save_map_to_pcd", &VDBMappingROS::saveMapToPCD, this);
+
   m_get_map_section_service =
     m_priv_nh.advertiseService("get_map_section", &VDBMappingROS::getMapSectionCallback, this);
 
@@ -310,6 +313,16 @@ bool VDBMappingROS<VDBMappingT>::saveMap(std_srvs::Trigger::Request& req,
   (void)req;
   ROS_INFO_STREAM("Saving Map");
   res.success = m_vdb_map->saveMap();
+  return res.success;
+}
+
+template <typename VDBMappingT>
+bool VDBMappingROS<VDBMappingT>::saveMapToPCD(std_srvs::Trigger::Request& req,
+                                              std_srvs::Trigger::Response& res)
+{
+  (void)req;
+  ROS_INFO_STREAM("Saving Map to PCD");
+  res.success = m_vdb_map->saveMapToPCD();
   return res.success;
 }
 
