@@ -393,7 +393,7 @@ bool VDBMappingROS<VDBMappingT>::triggerMapSectionUpdateCallback(
 
   if (srv.response.success)
   {
-    m_vdb_map->overwriteMap(strToGrid(srv.response.section.map));
+    m_vdb_map->overwriteMap(byteArrayToGrid(srv.response.section.map));
   }
 
   res.success = srv.response.success;
@@ -554,7 +554,7 @@ vdb_mapping_msgs::UpdateGrid
 VDBMappingROS<VDBMappingT>::gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const
 {
   vdb_mapping_msgs::UpdateGrid msg;
-  msg.map = gridToStr(update);
+  msg.map = gridToByteArray(update);
   return msg;
 }
 
@@ -570,10 +570,18 @@ VDBMappingROS<VDBMappingT>::gridToStr(const typename VDBMappingT::UpdateGridT::P
 }
 
 template <typename VDBMappingT>
+std::vector<uint8_t>
+VDBMappingROS<VDBMappingT>::gridToByteArray(const typename VDBMappingT::UpdateGridT::Ptr update) const
+{
+  std::string map_str = gridToStr(update);
+  return std::vector<uint8_t>(map_str.begin(), map_str.end());
+}
+
+template <typename VDBMappingT>
 typename VDBMappingT::UpdateGridT::Ptr
 VDBMappingROS<VDBMappingT>::msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const
 {
-  return strToGrid(msg->map);
+  return byteArrayToGrid(msg->map);
 }
 
 template <typename VDBMappingT>
@@ -589,6 +597,14 @@ VDBMappingROS<VDBMappingT>::strToGrid(const std::string& msg) const
   typename VDBMappingT::UpdateGridT::Ptr update_grid =
     openvdb::gridPtrCast<typename VDBMappingT::UpdateGridT>(grids->front());
   return update_grid;
+}
+
+template <typename VDBMappingT>
+typename VDBMappingT::UpdateGridT::Ptr
+VDBMappingROS<VDBMappingT>::byteArrayToGrid(const std::vector<uint8_t>& msg) const
+{
+  std::string map_str(msg.begin(), msg.end());
+  return strToGrid(map_str);
 }
 
 template <typename VDBMappingT>
@@ -677,7 +693,7 @@ void VDBMappingROS<VDBMappingT>::sectionTimerCallback(const ros::TimerEvent& eve
   msg.header.frame_id = m_map_frame;
   msg.header.stamp    = event.current_real;
   msg.header.seq      = sequence_number++;
-  msg.map             = gridToStr(section);
+  msg.map             = gridToByteArray(section);
   m_map_section_pub.publish(msg);
 }
 

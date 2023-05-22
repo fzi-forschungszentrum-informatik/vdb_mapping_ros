@@ -166,6 +166,15 @@ public:
   std::string gridToStr(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
+   * \brief Creates a byte vector from an input grid
+   *
+   * \param update Update grid
+   *
+   * \returns bitstream
+   */
+  std::vector<uint8_t> gridToByteArray(const typename VDBMappingT::UpdateGridT::Ptr update) const;
+
+  /*!
    * \brief Unpacks an update grid from a compressed bitstream
    *
    * \param msg Compressed Bitstream
@@ -176,13 +185,22 @@ public:
   msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const;
 
   /*!
-   * \brief Unpacks an update grid from a ROS msg
+   * \brief Unpacks an update grid from a string
    *
-   * \param msg Compressed Bitstream as ROS msg
+   * \param msg Compressed Bitstream as std::string
    *
    * \returns Update Grid
    */
   typename VDBMappingT::UpdateGridT::Ptr strToGrid(const std::string& msg) const;
+
+  /*!
+   * \brief Unpacks an update grid from a vector of uint8_t
+   *
+   * \param msg Compressed Bitstream as std::vector<uint8_t>
+   *
+   * \returns Update Grid
+   */
+  typename VDBMappingT::UpdateGridT::Ptr byteArrayToGrid(const std::vector<uint8_t>& msg) const;
 
   /*!
    * \brief Listens to map updates and creats a map from these
