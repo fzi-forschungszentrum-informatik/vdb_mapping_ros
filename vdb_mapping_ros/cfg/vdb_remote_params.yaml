@@ -1,3 +1,4 @@
+# Basic setup
 map_frame: map
 robot_frame: base_link
 max_range: 10.0
@@ -6,14 +7,19 @@ prob_hit: 0.8
 prob_miss: 0.1
 thres_min: 0.12
 thres_max: 0.8
+map_save_dir: ""
+
+# Visualizations
 publish_pointcloud: true
 publish_vis_marker: true
+
+# Sensor input
+apply_raw_sensor_data: false
+
+# Remote mapping
 publish_updates: false
 publish_overwrites: false
 publish_sections: false
-apply_raw_sensor_data: false
-map_save_dir: ""
-
 remote_sources: [vdb_mapping]
 vdb_mapping:
   namespace: vdb_mapping
