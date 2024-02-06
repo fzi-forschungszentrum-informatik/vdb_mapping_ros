@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(vdb_mapping_ros)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules" ${CMAKE_MODULE_PATH})
 
 add_compile_options(-std=c++14 -Wall -Wextra -pedantic -Werror)
 
@@ -27,8 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(vdb_mapping REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(ZSTD REQUIRED libzstd>=1.1.4)
+find_package(ZSTD REQUIRED)
 
 generate_dynamic_reconfigure_options(
   cfg/VDBMappingROS.cfg
@@ -48,6 +48,8 @@ catkin_package(
     tf2_sensor_msgs
     vdb_mapping_msgs
     visualization_msgs
+  DEPENDS
+    ZSTD
 )
 
 
