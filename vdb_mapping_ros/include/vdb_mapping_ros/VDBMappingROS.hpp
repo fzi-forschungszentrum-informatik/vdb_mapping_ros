@@ -29,6 +29,9 @@
 #include <iostream>
 #include <vdb_mapping_ros/VDBMappingROS.h>
 
+#include <zstd.h>
+
+
 template <typename VDBMappingT>
 VDBMappingROS<VDBMappingT>::VDBMappingROS(const ros::NodeHandle& nh)
   : m_priv_nh(nh)
@@ -570,11 +573,32 @@ VDBMappingROS<VDBMappingT>::gridToStr(const typename VDBMappingT::UpdateGridT::P
 }
 
 template <typename VDBMappingT>
-std::vector<uint8_t>
-VDBMappingROS<VDBMappingT>::gridToByteArray(const typename VDBMappingT::UpdateGridT::Ptr update) const
+std::vector<uint8_t> VDBMappingROS<VDBMappingT>::gridToByteArray(
+  const typename VDBMappingT::UpdateGridT::Ptr update) const
 {
   std::string map_str = gridToStr(update);
-  return std::vector<uint8_t>(map_str.begin(), map_str.end());
+  auto uncompressed   = std::vector<uint8_t>(map_str.begin(), map_str.end());
+
+  // Create buffer with enough size for worst case scenario
+  size_t len = ZSTD_compressBound(uncompressed.size());
+  std::vector<uint8_t> compressed(len);
+
+  int ret = ZSTD_compress(
+      compressed.data(), len, uncompressed.data(), uncompressed.size(), m_compression_level);
+
+
+  if (ZSTD_isError(ret))
+  {
+    ROS_ERROR(
+        "Compression using ZSTD failed: '%s', sending uncompressed byte array",
+        ZSTD_getErrorName(ret));
+
+    return uncompressed;
+  }
+
+  // Resize compressed buffer to actual compressed size
+  compressed.resize(ret);
+  return compressed;
 }
 
 template <typename VDBMappingT>
@@ -603,8 +627,24 @@ template <typename VDBMappingT>
 typename VDBMappingT::UpdateGridT::Ptr
 VDBMappingROS<VDBMappingT>::byteArrayToGrid(const std::vector<uint8_t>& msg) const
 {
-  std::string map_str(msg.begin(), msg.end());
+  std::size_t len = ZSTD_getDecompressedSize(msg.data(), msg.size());
+  std::vector<uint8_t> uncompressed(len);
+
+  std::size_t size = ZSTD_decompress(uncompressed.data(), len, msg.data(), msg.size());
+
+
+  if (ZSTD_isError(size))
+  {
+    ROS_ERROR(
+        "Could not decompress map using ZSTD: %s. Returning raw data.",
+        ZSTD_getErrorName(size));
+    std::string map_str(msg.begin(), msg.end());
+    return strToGrid(map_str);
+  }
+
+  std::string map_str(uncompressed.begin(), uncompressed.end());
   return strToGrid(map_str);
+
 }
 
 template <typename VDBMappingT>

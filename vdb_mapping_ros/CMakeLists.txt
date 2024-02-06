@@ -27,6 +27,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(vdb_mapping REQUIRED)
+find_package(PkgConfig)
+pkg_check_modules(ZSTD REQUIRED libzstd>=1.1.4)
 
 generate_dynamic_reconfigure_options(
   cfg/VDBMappingROS.cfg
@@ -58,6 +60,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${ZSTD_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable
@@ -73,6 +76,7 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(${PROJECT_NAME}_node
   vdb_mapping::vdb_mapping
   ${catkin_LIBRARIES}
+  ${ZSTD_LIBRARIES}
 )
 
 #############

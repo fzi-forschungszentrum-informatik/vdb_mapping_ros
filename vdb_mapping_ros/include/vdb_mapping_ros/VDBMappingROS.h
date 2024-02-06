@@ -524,6 +524,11 @@ private:
    * \brief Initialization flag used to prevent dynamic reconfigure from overriding parameter file
    */
   bool m_dynamic_reconfigure_initialized;
+  /*!
+   * \brief Compression level used for creating the byte array message.
+   */
+  unsigned int m_compression_level = 1;
+
 };
 
 #include "VDBMappingROS.hpp"
