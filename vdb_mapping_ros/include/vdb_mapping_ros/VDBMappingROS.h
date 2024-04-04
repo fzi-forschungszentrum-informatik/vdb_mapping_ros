@@ -528,7 +528,6 @@ private:
    * \brief Compression level used for creating the byte array message.
    */
   unsigned int m_compression_level = 1;
-
 };
 
 #include "VDBMappingROS.hpp"
