@@ -584,14 +584,13 @@ std::vector<uint8_t> VDBMappingROS<VDBMappingT>::gridToByteArray(
   std::vector<uint8_t> compressed(len);
 
   int ret = ZSTD_compress(
-      compressed.data(), len, uncompressed.data(), uncompressed.size(), m_compression_level);
+    compressed.data(), len, uncompressed.data(), uncompressed.size(), m_compression_level);
 
 
   if (ZSTD_isError(ret))
   {
-    ROS_ERROR(
-        "Compression using ZSTD failed: '%s', sending uncompressed byte array",
-        ZSTD_getErrorName(ret));
+    ROS_ERROR("Compression using ZSTD failed: '%s', sending uncompressed byte array",
+              ZSTD_getErrorName(ret));
 
     return uncompressed;
   }
@@ -635,16 +634,14 @@ VDBMappingROS<VDBMappingT>::byteArrayToGrid(const std::vector<uint8_t>& msg) con
 
   if (ZSTD_isError(size))
   {
-    ROS_ERROR(
-        "Could not decompress map using ZSTD: %s. Returning raw data.",
-        ZSTD_getErrorName(size));
+    ROS_ERROR("Could not decompress map using ZSTD: %s. Returning raw data.",
+              ZSTD_getErrorName(size));
     std::string map_str(msg.begin(), msg.end());
     return strToGrid(map_str);
   }
 
   std::string map_str(uncompressed.begin(), uncompressed.end());
   return strToGrid(map_str);
-
 }
 
 template <typename VDBMappingT>

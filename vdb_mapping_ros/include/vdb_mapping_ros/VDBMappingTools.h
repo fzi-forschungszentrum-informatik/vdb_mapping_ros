@@ -28,12 +28,12 @@
 #ifndef VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED
 #define VDB_MAPPING_ROS_VDBMAPPINGTOOLS_H_INCLUDED
 
+#include <openvdb/openvdb.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/Marker.h>
-#include <openvdb/openvdb.h>
 
 /*!
  * \brief Collection of VDBMapping helper functions and tools
