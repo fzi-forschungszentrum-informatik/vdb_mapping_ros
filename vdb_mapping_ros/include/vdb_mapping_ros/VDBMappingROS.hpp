@@ -383,7 +383,7 @@ bool VDBMappingROS<VDBMappingT>::getMapSectionCallback(
     return true;
   }
 
-  res.section                 = gridToMsg(m_vdb_map->getMapSectionUpdateGrid(
+  res.section.map             = gridToByteArray(m_vdb_map->getMapSectionUpdateGrid(
     Eigen::Matrix<double, 3, 1>(
       req.bounding_box.min_corner.x, req.bounding_box.min_corner.y, req.bounding_box.min_corner.z),
     Eigen::Matrix<double, 3, 1>(
@@ -553,14 +553,16 @@ void VDBMappingROS<VDBMappingT>::publishUpdates(typename VDBMappingT::UpdateGrid
   header.seq      = sequence_number++;
   if (m_publish_updates)
   {
-    vdb_mapping_msgs::UpdateGrid msg = gridToMsg(update);
-    msg.header                       = header;
+    vdb_mapping_msgs::UpdateGrid msg;
+    msg.map    = gridToByteArray(update);
+    msg.header = header;
     m_map_update_pub.publish(msg);
   }
   if (m_publish_overwrites)
   {
-    vdb_mapping_msgs::UpdateGrid msg = gridToMsg(overwrite);
-    msg.header                       = header;
+    vdb_mapping_msgs::UpdateGrid msg;
+    msg.map    = gridToByteArray(overwrite);
+    msg.header = header;
     m_map_overwrite_pub.publish(msg);
   }
 }
@@ -576,15 +578,6 @@ void VDBMappingROS<VDBMappingT>::insertPointCloud(
   // Integrate data into vdb grid
   m_vdb_map->insertPointCloud(cloud, sensor_to_map_eigen, update, overwrite);
   publishUpdates(update, overwrite, transform.header.stamp);
-}
-
-template <typename VDBMappingT>
-vdb_mapping_msgs::UpdateGrid
-VDBMappingROS<VDBMappingT>::gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const
-{
-  vdb_mapping_msgs::UpdateGrid msg;
-  msg.map = gridToByteArray(update);
-  return msg;
 }
 
 template <typename VDBMappingT>

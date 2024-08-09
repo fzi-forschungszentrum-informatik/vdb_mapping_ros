@@ -157,14 +157,6 @@ public:
                       typename VDBMappingT::UpdateGridT::Ptr overwrite,
                       ros::Time stamp) const;
 
-  /*!
-   * \brief Creates a compressed Bitstream as ROS msg from an input grid
-   *
-   * \param update Update grid
-   *
-   * \returns update msg
-   */
-  vdb_mapping_msgs::UpdateGrid gridToMsg(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
    * \brief Creates a compressed Bitstream as string from an input grid
