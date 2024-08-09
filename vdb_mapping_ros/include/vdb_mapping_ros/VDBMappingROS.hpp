@@ -621,13 +621,6 @@ std::vector<uint8_t> VDBMappingROS<VDBMappingT>::gridToByteArray(
 
 template <typename VDBMappingT>
 typename VDBMappingT::UpdateGridT::Ptr
-VDBMappingROS<VDBMappingT>::msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const
-{
-  return byteArrayToGrid(msg->map);
-}
-
-template <typename VDBMappingT>
-typename VDBMappingT::UpdateGridT::Ptr
 VDBMappingROS<VDBMappingT>::strToGrid(const std::string& msg) const
 {
   std::istringstream iss(msg);
@@ -675,7 +668,7 @@ void VDBMappingROS<VDBMappingT>::mapUpdateCallback(
   }
   sequence_number++;
 
-  m_vdb_map->updateMap(msgToGrid(update_msg));
+  m_vdb_map->updateMap(byteArrayToGrid(update_msg->map));
 }
 
 template <typename VDBMappingT>
@@ -689,7 +682,7 @@ void VDBMappingROS<VDBMappingT>::mapOverwriteCallback(
     sequence_number = update_msg->header.seq;
   }
   sequence_number++;
-  m_vdb_map->overwriteMap(msgToGrid(update_msg));
+  m_vdb_map->overwriteMap(byteArrayToGrid(update_msg->map));
 }
 
 template <typename VDBMappingT>
@@ -704,7 +697,7 @@ void VDBMappingROS<VDBMappingT>::mapSectionCallback(
   }
   sequence_number++;
 
-  m_vdb_map->applyMapSectionUpdateGrid(msgToGrid(update_msg));
+  m_vdb_map->applyMapSectionUpdateGrid(byteArrayToGrid(update_msg->map));
 }
 
 

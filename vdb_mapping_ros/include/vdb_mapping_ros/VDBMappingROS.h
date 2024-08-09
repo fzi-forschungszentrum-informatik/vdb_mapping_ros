@@ -177,16 +177,6 @@ public:
   std::vector<uint8_t> gridToByteArray(const typename VDBMappingT::UpdateGridT::Ptr update) const;
 
   /*!
-   * \brief Unpacks an update grid from a compressed bitstream
-   *
-   * \param msg Compressed Bitstream
-   *
-   * \returns Update Grid
-   */
-  typename VDBMappingT::UpdateGridT::Ptr
-  msgToGrid(const vdb_mapping_msgs::UpdateGrid::ConstPtr& msg) const;
-
-  /*!
    * \brief Unpacks an update grid from a string
    *
    * \param msg Compressed Bitstream as std::string
